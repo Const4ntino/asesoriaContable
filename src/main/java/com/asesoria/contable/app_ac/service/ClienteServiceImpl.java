@@ -50,13 +50,6 @@ public class ClienteServiceImpl implements ClienteService {
     }
 
     @Override
-    public ClienteResponse findClienteByUsuarioId(Long usuarioId) {
-        return clienteRepository.findByUsuarioId(usuarioId)
-                .map(clienteMapper::toClienteResponse)
-                .orElseThrow(UsuarioNotFoundException::new);
-    }
-
-    @Override
     public ClienteResponse findByUsuarioId(Long usuarioId) {
         return clienteRepository.findByUsuarioId(usuarioId)
                 .map(clienteMapper::toClienteResponse)

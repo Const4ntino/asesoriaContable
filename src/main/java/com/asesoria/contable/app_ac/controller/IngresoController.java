@@ -65,18 +65,8 @@ public class IngresoController {
     // Filtrar ingresos por cliente
     @PreAuthorize("hasRole('CLIENTE')")
     @GetMapping("/mis-ingresos")
-    public ResponseEntity<List<IngresoResponse>> getIngresosByCliente(@AuthenticationPrincipal UserDetails usuario) {
+    public ResponseEntity<List<IngresoResponse>> getIngresosByCliente(@AuthenticationPrincipal Usuario usuario) {
         List<IngresoResponse> ingresos = ingresoService.findAllByCliente(usuario);
-        return ResponseEntity.ok(ingresos);
-    }
-
-    // Filtrar por rango de fechas
-    @GetMapping("/filtrar/fecha")
-    public ResponseEntity<List<IngresoResponse>> getIngresosByFechaRange(
-            @RequestParam LocalDate fechaInicio,
-            @RequestParam LocalDate fechaFin,
-            @RequestParam(required = false) Long idCliente) {
-        List<IngresoResponse> ingresos = ingresoService.findByFechaBetween(fechaInicio, fechaFin, idCliente);
         return ResponseEntity.ok(ingresos);
     }
 
