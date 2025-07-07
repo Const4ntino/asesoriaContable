@@ -9,6 +9,7 @@ public interface ClienteService {
 
     ClienteResponse findById(Long id);
     List<ClienteResponse> findAll();
+    ClienteResponse findClienteByUsuarioId(Long usuarioId);
     ClienteResponse findByUsuarioId(Long usuarioId);
     List<ClienteResponse> findAllByContadorId(Long contadorId);
     ClienteResponse save(ClienteRequest request);

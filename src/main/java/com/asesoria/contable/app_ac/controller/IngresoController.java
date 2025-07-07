@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -62,10 +63,10 @@ public class IngresoController {
     }
 
     // Filtrar ingresos por cliente
-    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @PreAuthorize("hasRole('CLIENTE')")
     @GetMapping("/mis-ingresos")
-    public ResponseEntity<List<IngresoResponse>> getIngresosByCliente(@AuthenticationPrincipal Cliente cliente) {
-        List<IngresoResponse> ingresos = ingresoService.findByCliente(cliente);
+    public ResponseEntity<List<IngresoResponse>> getIngresosByCliente(@AuthenticationPrincipal UserDetails usuario) {
+        List<IngresoResponse> ingresos = ingresoService.findAllByCliente(usuario);
         return ResponseEntity.ok(ingresos);
     }
 
