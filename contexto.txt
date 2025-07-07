@@ -1,0 +1,393 @@
+Hola, haremos un sistema contable, hay 3 roles, CLIENTE, CONTADOR, 
+ADMINISTRADOR, empecemos con el CLIENTE, cada cliente tiene su régimen al que 
+pertenece, empecemos por los clientes que pertenecer al NRUS, cuando este CLIENTE 
+que pertenece al NRUS inicia sesión verá el dashboard con acciones rápidas, en el 
+ménu lateral tiene los siguientes módulos, Mis ingresos, Mis egresos, Mis 
+declaraciones, Pagos y Obligaciones, Reportes. En el módulo Mis ingresos el cliente 
+puede ver su historial de ingreso que ha subido, puede editar esos ingresos, también 
+puede eliminarlos, y subir un nuevo ingreso, para que lo suba debe llenar el monto, 
+fecha, descripción, n°comprobante y subir su comprobante. En el módulo de Mis 
+Egresos el cliente puede ver sus historial de egresos subidos, puede editar esos egresos 
+y también puede eliminarlos y puede subir un nuevo Egreso, para que lo suba debe 
+llenar el monto, fecha, descripción, n°comprobante y subir su comprobante. En el 
+módulo de declaraciones, el cliente puede ver todas las declaraciones, verá en su 
+historial de declaraciones: Periodo(automáticamente de acuerdo al mes y año), Tipo 
+(para este cliente NRUS el tipo es: cuota mensual), Total Ingreso, (calculada por el 
+sistema) Total de egreso (calculada por el sistema), Utilidad Estimada (el sistema lo 
+calcula total de ingresos del mes – total de egresos del mes). En el módulo de Pagos y 
+Obligaciones, en la parte superior están las alertas de vencimiento de las 
+obligaciones(el sistema lo calcula, de acuerdo a los clientes del NRUS, pueden pagar 
+Hasta el día 5 hábil del mes siguiente al que corresponde, ejemplos:     
+ALERTAS 
+ACTIVAS • Vence en 1 día: Cuota de 06/2024 → [Ir a pagar], • Vencida: Cuota de 
+05/2024 → [Ver detalle]),  en  obligaciones, se muestra Periodo(automático por el 
+sistema), Cuota Mensual(debe calcular automáticamente cuánto es la cuota que debe 
+pagar el cliente de acuerdo a Categoría 1 Total de ingresos es ≤ S/ 1,700 → cuota = S/ 
+20 , Categoría 2 Total de ingresos es ≤ S/ 2,500 → cuota = S/ 50, Categoría 3 Total de 
+ingresos ≤ S/ 3,500 → cuota = S/ 100 categoría 4 Total de ingresos ≤ S/ 5,000 → cuota = 
+S/ 150, Categoría 5 Total de ingresos > 8000 -> cuota :    
+excedido,) Estado 
+(pendiente, mientras no esté en categoría 5 y no se haga el pago, pendiente, si está en 
+categoría 5, es decir se excedió los 8000, No Disponible) , fecha límite (el sistema lo 
+calcula, de acuerdo a los clientes del NRUS, pueden pagar Hasta el día 5 hábil del mes 
+siguiente al que corresponde el pago), Observaciones (Si está dentro del límite: — o Sin 
+observaciones, Si se pasa del límite:     
+Exceso detectado – No puede pagar cuota fija. 
+Si aún no carga ingresos ese mes (pendiente):        
+En espera de ingresos para validar 
+límite.), Estado (Cumplido si se paga a tiempo, atrasado si se paga después o no 
+cumplido si no se paga), Acciones (pagar, mientras no esté en categoría 5, cuándo de 
+pagar debe abrirse un formulario con Pago de Obligación, Concepto: Cuota Mensual, 
+Periodo: 06/2024, Monto a pagar: S/_ [12/07/2024] ← Fecha del sistema o editable, 
+Medio de pago:  [Transferencia / Interbank / BCP / Yape],        
+voucher ]          
+Adjuntar archivo: [ Subir 
+Comentario: [ Campo opcional ] [ Cancelar ]    [ Confirmar pago ]), si da 
+confirmar pago, Se actualiza la obligación relacionada, estado = Pagada. Y también se 
+va a historial de pagos. Ahora los pagos, en historial de los pagos recientes, se 
+msotrará Periodo, concepto(es cuota mensual), fecha de pago, monto pagado, estado 
+(Validado, Por validar, Rehazado) , ver        
+, enviar msj al contador. Una opción que 
+lleve a ver todos los pagos, historial de pagos, se muestre Todos los pagos, 
+completados, pendientes y fallidos. En el módulo de reportes que vea la evolución de 
+sus ingresos y egresos por año, su utilidad estimada, y lo demás si ha de ser necesario. 
+Clientes que pertenecen al RER, RMT, RG, Cuándo los clientes pertenecen al RER, RMT 
+y RG, inician sesión con sus respectivos usuario y contraseña, ven el mismo y el menú 
+lateral con los siguientes módulos, Mis ingresos, Mis egresos, Declaraciones, Pagos y 
+Obligaciones, Reportes. En el módulo Mis ingresos el cliente puede ver su historial de 
+ingreso que ha subido, puede editar esos ingresos, también puede eliminarlos, y subir 
+un nuevo ingreso, para que lo suba debe llenar: descripción, monto, fecha, 
+n°comprobante, Tributario (select, Gravada / Exonerada / Inafecta, por defecto 
+gravada) y subir su comprobante. En el módulo de Mis Egresos el cliente puede ver su 
+historial de egresos subidos, puede editar esos egresos y también puede eliminarlos y 
+puede subir un nuevo Egreso, para que lo suba debe llenar el descripción, monto, 
+fecha, n°comprobante, Contabilidad (Select, costo o gasto), Tributario (select, Gravada 
+/ Exonerada / Inafecta, por defecto gravada) y subir su comprobante. En el módulo de 
+Declaraciones, el cliente puede ver todas las declaraciones que debe de hacer antes de 
+la fecha límite, de acuerdo con el último dígito del RUC, las fechas de vencimiento son 
+determinadas por SUNAT cada año, y varían según el mes tributario y el dígito final del 
+RUC. Para el periodo tributario de enero 2025, la fecha de vencimiento según el último 
+dígito del RUC es la siguiente: si el RUC termina en 0, el vencimiento es el 17 de 
+febrero; si termina en 1, el 18 de febrero; si termina en 2 o 3, el 19 de febrero; si 
+termina en 4 o 5, el 20 de febrero; si termina en 6 o 7, el 21 de febrero; si termina en 8 
+o 9, el 24 de febrero; y si se trata de buenos contribuyentes o UESP, el vencimiento es 
+el 25 de febrero. Para febrero 2025, el vencimiento para el dígito 0 es el 17 de marzo; 
+para el dígito 1, el 18 de marzo; para los dígitos 2 y 3, el 19 de marzo; para los dígitos 4 
+y 5, el 20 de marzo; para los dígitos 6 y 7, el 21 de marzo; para los dígitos 8 y 9, el 24 de 
+marzo; y para buenos contribuyentes y UESP, el 25 de marzo. En marzo 2025, el 
+vencimiento para el dígito 0 es el 15 de abril; para el 1, el 16 de abril; para los dígitos 2 
+y 3, el 21 de abril; para 4 y 5, el 22 de abril; para 6 y 7, el 23 de abril; para 8 y 9, el 24 
+de abril; y para buenos contribuyentes y UESP, el 25 de abril. En abril 2025, el 
+vencimiento es el 16 de mayo si el RUC termina en 0; el 19 de mayo si termina en 1; el 
+20 de mayo para los dígitos 2 y 3; el 21 de mayo para 4 y 5; el 22 de mayo para 6 y 7; el 
+23 de mayo para 8 y 9; y el 26 de mayo para buenos contribuyentes y UESP. Para mayo 
+2025, las fechas son: 16 de junio para el dígito 0; 17 de junio para el dígito 1; 18 de 
+junio para los dígitos 2 y 3; 19 de junio para 4 y 5; 20 de junio para 6 y 7; 23 de junio 
+para 8 y 9; y 24 de junio para buenos contribuyentes y UESP. En junio 2025, el 
+vencimiento corresponde al 15 de julio para el dígito 0; 16 de julio para el 1; 17 de julio 
+para los dígitos 2 y 3; 18 de julio para los dígitos 4 y 5; 21 de julio para 6 y 7; 22 de julio 
+para 8 y 9; y 24 de julio para buenos contribuyentes y UESP. Para julio 2025, las fechas 
+son: 18 de agosto si el RUC termina en 0; 19 de agosto si termina en 1; 20 de agosto 
+para 2 y 3; 21 de agosto para 4 y 5; 22 de agosto para 6 y 7; 25 de agosto para 8 y 9; y 
+26 de agosto para buenos contribuyentes y UESP. En agosto 2025, el vencimiento es el 
+15 de septiembre para el dígito 0; 16 de septiembre para el dígito 1; 17 de septiembre 
+para los dígitos 2 y 3; 18 de septiembre para 4 y 5; 19 de septiembre para 6 y 7; 22 de 
+septiembre para 8 y 9; y 23 de septiembre para buenos contribuyentes y UESP. Para 
+septiembre 2025, las fechas son: 16 de octubre para el dígito 0; 17 de octubre para el 
+1; 20 de octubre para los dígitos 2 y 3; 21 de octubre para los dígitos 4 y 5; 22 de 
+octubre para los dígitos 6 y 7; 23 de octubre para 8 y 9; y 24 de octubre para buenos 
+contribuyentes y UESP. En octubre 2025, el vencimiento es el 17 de noviembre para el 
+dígito 0; 18 de noviembre para el 1; 19 de noviembre para los dígitos 2 y 3; 20 de 
+noviembre para 4 y 5; 21 de noviembre para 6 y 7; 24 de noviembre para 8 y 9; y 25 de 
+noviembre para buenos contribuyentes y UESP. Para noviembre 2025, las fechas de 
+vencimiento son: 17 de diciembre si el RUC termina en 0; 18 de diciembre si termina 
+en 1; 19 de diciembre para 2 y 3; 22 de diciembre para 4 y 5; 23 de diciembre para 6 y 
+7; 24 de diciembre para 8 y 9; y 26 de diciembre para buenos contribuyentes y UESP. 
+Finalmente, para diciembre 2025, los vencimientos se trasladan a enero de 2026: 18 
+de enero para el dígito 0; 19 de enero para el dígito 1; 20 de enero para los dígitos 2 y 
+3; 21 de enero para 4 y 5; 22 de enero para 6 y 7; 23 de enero para 8 y 9; y 26 de enero 
+de 2026 para buenos contribuyentes y UESP. El historial de declaraciones puede verlo 
+de esta forma, lo que puede hacer el cliente están en acciones, no puede editar, ni 
+eliminar, ni agregar (por qué eso es responsabilidad de su contador, su historial de 
+declaraciones se muestra así: Periodo (mes – año, automático por el sistema), Tipo(IGV 
++ Renta, es automático, el contador puede editarlo), Estado (Pendiente automático, 
+cambia a presentado, cuándo el contador da como presentado esta declaración en su 
+panel),  Fecha límite (de acuerdo a último dígito del RUC, las fechas de vencimiento 
+son determinadas por SUNAT cada año, ya te mencioné a inicio) Constancia(acá 
+permanece en vacio, hasta que el contador suba las constancias, declaración y 
+constancia en pdf u otro formato, Acciones(las acciones que puede hacer el cliente es 
+(    
+Notificar a mi contador, si da click Abre una ventana de confirmación:“¿Deseas 
+notificar a tu contador que la declaración de julio aún está pendiente?” [Enviar 
+Notificación] → Se envía mensaje automático al contador, y también puede enviar 
+mensaje a su contador (cuando click, Campo de texto: “¿Deseas enviarle una nota a tu 
+contador?” Escribe: “Hola, ¿ya tendrás lista la declaración de julio?       
+” Botón:        
+Enviar mensaje). “Cuándo el contador da cómo presentado desde su panel de 
+contador, se cambia al estado presentado y por lo tanto en acciones, el cliente no 
+puede hacer nada, ni notificar ni enviar comentario, puede descargar las constancias 
+que subió su contador.” En la parte superior de declaraciones se maneja alertas si ya 
+está por vencer su declaración y aún no está como presentada, estás alertas deben 
+eliminarse después de 10 días. En el módulo de Pagos y Obligaciones, en la parte 
+superior están las obligaciones y una opción para ir a historial de obligaciones, las 
+obligaciones recientes de muestran de esta forma, periodo, tipo, fecha límite, monto, 
+estado (Pendiente, vencidas, pagadas )       
+Ver Detalle(cuándo se da click aparece la 
+declaración vinculada a esa obligación, y todos sus datos de esa declración),      
+Pagar 
+(Al hacer clic se abre formulario: Registrar Pago, Cliente:(automático, el mismo 
+cliente)Periodo: (carga automática del periodo), Concepto:( periodo de obligación 
+Tipo de obligación )Monto: [Campo de texto], Fecha de pago: [Selector de fecha], 
+Medio de pago: [Banco / NPS / App],         
+Adjuntar constancia, [       
+Cancelar].        
+Guardar]    [❌ 
+Luego de guardar… El sistema muestra:✅ “Tu pago ha sido registrado 
+correctamente y será validado por tu contador.”            
+“Le hemos notificado para que lo 
+revise.” Y Ahora aparece en historial de pagos, Concepto (va el periodo y el tipo de 
+obligación), monto, fecha, Estado (se maneja, por validar automático, “hasta que el 
+contador valide o rechace”, validado y rechazado) , Acciones (ver       
+, y un ojito para 
+ver detalles de la obligación y declaración a la que está vinculada., Observación (debe 
+aparecer la observación que le hizo el contador al momento de rechazarlo, si no lo 
+rechaza, no aparece nada) y botón de editar (solo aparece si el contador rechaza, una 
+vez que edita debe desaparecer este botón). Si el contador valida solo se cambia el 
+estado a validado, no aparece nada observación, y en obligación aparece como 
+pagadas. Si el contador realiza el pago, la obligación actualiza su estado a pagadas y 
+también el pago se pone registrado ene estado. En caso que el pago sea fuera de la 
+fecha, debe aparecer pagada con retraso y un ojito para ver detalles de su pago). Ok, 
+en historial de pagos debe verse se muestre Todos los pagos, completados, pendientes 
+y fallidos. En el módulo de Reportes, debe verse Gráfico 1: Ingresos y egresos por mes 
+(Barras), Gráfico 2: Línea de ingreso anual acumulado, Eje X: Meses. Eje Y: Suma 
+acumulada, → Línea sube mes a mes, Semáforo tributario (Tope de régimen). De 
+acuerdo al régimen en el que está el cliente(si es RG, no muestra el semáforo 
+tributario), Régimen RER (máx. S/ 525,000 al año), Ingresos acumulados S/.   , Estado: 
+Estado:   
+Cerca del tope (%), si pasa el 100%,     
+¡has excedido el tope del RER! tu 
+contador te notificará el cambio de régimen. Promedio mensual sugerido: S/ 43,750, 
+En el módulo de Reportes, justo debajo o junto al gráfico de ingresos por mes 
+(barras) y también podría aparecer como alerta flotante si se excede. Cuando en el 
+mes actual, el cliente registra ingresos mayores a S/ 43,750, aunque el acumulado anual 
+aún esté dentro del tope. Mensaje visual (alerta amarilla):     
+Este mes superaste el 
+ingreso promedio mensual sugerido para el RER (S/ 43,750). Ingreso de este mes: S/ 
+56,300, Revisa tu historial y consulta con tu contador para evitar exceder el tope anual. 
+¿Qué pasa si al mes siguiente vuelve a bajar? La alerta de ese mes desaparece 
+automáticamente, Solo se muestra cuando un mes actual excede los 43,750. Régimen 
+RMT (máx. S/ S/ 1,700,000 en ingresos brutos al año), Cuando en el mes actual, el 
+cliente registra ingresos mayores a S/ 141,667, aunque el acumulado anual aún esté 
+dentro del tope. Mensaje (alerta amarilla):     
+Este mes superaste el ingreso promedio 
+mensual sugerido para el RMT (S/ 141,667). Ingreso de este mes: S/ 165,000 
+Revisa tu historial y consulta con tu contador para evitar exceder el tope anual. Si los 
+ingresos acumulados superan los S/ 1,700,000:     
+¡Has excedido el tope del RMT! 
+Tu contador te notificará el cambio al Régimen General.     
+Si baja el siguiente mes: La 
+alerta mensual desaparece automáticamente. Solo se muestra si el ingreso mensual 
+supera los S/ 141,667. Tabla comparativa de periodos: Mes, Ingresos, Egresos, 
+Impuesto pagado, Declaración (si o no), Pago (si o no). Ahora el panel de CONTADOR, 
+cuando el contador inicie sesión verá lo siguiente, menú lateral seleccionado en Panel 
+principal, el menú lateral tendrá los siguientes módulos: Panel Principal, Gestión de 
+clientes, Reportes Tributarios, Alertas SUNAT, Declaraciones, Pagos y obligaciones. >En 
+el módulo de Gestión de Clientes el contador podrá ver la lista de sus clientes, nombre, 
+estado, régimen, razón social si es que tiene, RUC, teléfono, Email, tareas pendientes 
+(numero de tarea en caso las haya), su última conexión, y el botón ver panel, cuando 
+de click ver panel debe aparecerle en la parte superior • Título grande: Nombre del 
+cliente, al lado su estado, Botón [← Volver] en la esquina superior izquierda, al pie del 
+nombre del cliente razón social si es persona jurídica, RUC o DNI: | Régimen: . En la 
+parte inferior a ese encabezado una barra horizontal, con Resumen, Ingresos, Egresos, 
+Declaraciones, Pagos, cuando seleccione resumen, aparece, total de ingresos, total de 
+egresos, balane, y tareas pendientes (n|), Alertas Importantes, cómo (Declaración de 
+Julio 2025 pendiente - Vence el 15/08/2025, Validar pago de Renta 4ta de Junio 2025) 
+y Última Actividad (ejemplo: Último pago registrado, 12/08/2025 - S/ 3,055 (IGV + 
+Renta)), cuando seleccione en Ingresos debe aparecer , total de ingresos del mes con 
+boton de ver historial, comprobantes (n°) con bóton de ver archivos), cuándo presione 
+botón de ver historial aparezca en la parte inferior el historial de ingresos que subío el 
+cliente, con la opción de editar y eliminar, se toca otra vez ver historial para 
+desaparecerlo, o cuando se toca el botón de ver archivos, desaparece y se muestra en 
+esa parte inferior, todos los archivos que subió el cliente. cuando seleccione en Egresos 
+debe aparecer , total de egresos del mes con boton de ver historial, comprobantes (n°) 
+con bóton de ver archivos), cuándo presione botón de ver historial aparezca en la 
+parte inferior el historial de egresos que subío el cliente, con la opción de editar y 
+eliminar(si elimina o edita datos, debe actualizarse tanto en el panel del contador y del 
+cliente respectivo), se toca otra vez ver historial para desaparecerlo, o cuando se toca 
+el botón de ver archivos, desaparece y se muestra en esa parte inferior, todos los 
+archivos que subió el cliente. Cuándo seleccione declaraciones debe mostrarse las 
+declaraciones de acuerdo al régimen de ese cliente, si el régimen es NRUS, debe estar 
+todas las declaraciones relacionadas a ese mismo cliente, de esta forma, 
+Periodo(automáticamente de acuerdo al mes y año), Tipo (para este cliente NRUS el 
+tipo es: cuota mensual), Total Ingreso, (calculada por el sistema) Total de egreso 
+(calculada por el sistema), Utilidad Estimada (el sistema lo calcula total de ingresos del 
+mes – total de egresos del mes)<- de hecho será la misma tabla que le muestra al 
+cliente respectivo de RNUS, eso mismo verá el contador si el panel del cliente al que 
+entró tiene régimen NRUS, ahora, las declaraciones en caso que el panel al que ingresó 
+el contador tenga como régimen, RMT o RG o RER, le aparecerá las declaraciones  de 
+esta forma, por cada declaración del cliente, periodo (automático por el sistema), tipo 
+(por defecto IGV + Renta), estado (pendiente), fecha límite, cuando está en estado 
+pendiente el contador, da click sobre esa declaración de ese cliente y le aparecerá lo 
+siguiente Procesando Declaración – Nombre de ese cliente (carga automática del 
+nombre del cliente, de acuerdo al panerl del cliente en el que se está), ✅ Cálculo 
+Automático Completado, Datos procesados correctamente. Revisa los resultados antes 
+de enviar. RUC: de ese cliente, Nota: declara con tu usuario sol y clave sol, Datos 
+Generales,Periodo Tributario: 07/2025, (se carga automáticamente de la declaración), 
+Tipo de régimen: (carga automática, según el régimen al que pertenece el cliente), Tipo 
+de declaración: (Original, por defecto),       
+Resumen de Cálculos: Impuesto General a 
+las Ventas (IGV), C100: Ingresos gravados: S/. (suma automática total de todos los 
+ingresos gravados del cliente, los ingresos que el cliente subió como GRAVADO), C105: 
+Ingresos exoneradas: S/. (suma automática total de todos los ingresos que el cliente 
+marcó como EXONERADO), C109: Ingresos inafectos: S/. (suma automática total de 
+todos los ingresos que el cliente marcó como INAFECTOS), C115: IGV ventas: S/. (suma 
+del IGV de cada venta gravada individual, es dcir sumas cada IGV de la venta que el 
+CLIENTE marcó como GRAVADA), Crédito Fiscal (Compras), C116: Compras gravadas: 
+S/. (suma de todos los egresos que el cliente marcó como GRAVADA), C120: IGV 
+compras: S/. (suma automática de cada IGV de cada comprobante de compra, 
+relacionado al egreso que el cliente marcó como GRAVADA), Resultado del IGV, C131: 
+IGV neto a pagar: S/. (calcula automáticamente IGV ventas – IGV compras), C127: 
+Saldo a favor del IGV: S/  ___ (el contador puede agregarlo o dejarlo en blanco ), C128: 
+Retenciones de IGV: S/ ___ (el contador puede agregarlo o dejarlo en blanco ), C 131-A 
+/ 132 Percepciones de IGV: S/ ___ (el contador puede agregarlo o dejarlo en blanco ), 
+C129: Saldo a favor: S/. ( el contador puede agregarlo o dejarlo en blanco), IGV del 
+periodo a pagar:  S/.  (Resta automática C131: IGV neto a pagar - C127: Saldo a favor 
+del IGV - C128: Retenciones de IGV -  C 131-A / 132 Percepciones de IGV - C129: Saldo 
+a favor), en cada cálculo que haces debes poner al lado un ojito, para que el contador 
+vea cómo hiciste esos cálculos, además debe ser del respectivo usuario (que se 
+muestra en Procesando Declaración – Nombre de ese cliente (carga automática del 
+nombre del cliente, de acuerdo al panerl del cliente en el que se está), ok, ahora el  
+Impuesto a la Renta (IR), depende de cada régimen, y el régimen está en la parte 
+superior que dice Tipo de régimen: (carga automática, según el régimen al que 
+pertenece el cliente),  en caso sea RER, debes calcular de esta forma:          
+Impuesto a la 
+Renta (IR), C 120: Ingresos netos del mes: S/.  es lo mismo que C100: Ingresos 
+gravados: (suma automática total de todos los ingresos gravados del cliente, los 
+ingresos que el cliente subió como GRAVADO)) C121: Impuesto a la Renta (1.5%), 
+C122: IR estimado: S/.  (cálculo automático de C 120: Ingresos netos del mes * 1.5%), 
+Total a pagar, IGV del periodo a pagar: S/. (ese cálculo ya lo hiciste, pones el 
+mismo) C122 IR estimado: ( acá pones IR estimado) C126: Multas e intereses: S/ (el 
+contador agrega manualmente si es que hubiese), C140: Total a pagar : (suma 
+automática de IGV del periodo a pagar + C122: IR estimado + C126: Multas e 
+intereses). en caso sea RMT,          
+Impuesto a la Renta (IR), C 120: Ingresos netos del 
+mes: S/. (es lo mismo que C100: Ingresos gravados: (suma automática total de todos 
+los ingresos gravados del cliente, los ingresos que el cliente subió como GRAVADO)), se 
+presenta esta opción si el contador no marca como check, entonces se prosigue [ ] 
+Usar coeficiente SUNAT, C121: Impuesto a la Renta (1%), C122: IR estimado: S/.  
+(cálculo automático de C 120: Ingresos netos del mes * C121), entonces el          
+total a 
+pagar sería  IGV del periodo a pagar: S/. (ese cálculo ya lo hiciste, pones el mismo) 
+C122 IR estimado: ( acá pones IR estimado) C126: Multas e intereses: S/ (el contador 
+agrega manualmente si es que hubiese), C140: Total a pagar : (suma automática de IGV 
+del periodo a pagar + C122: IR estimado + C126: Multas e intereses). Si se marca el 
+check [✔] Usar coeficiente SUNAT, entonces ya no se usa la tasa fija del 1%, sino que 
+se habilita C123: Coeficiente aplicado: (dato ingresado por el contador según 
+coeficiente anual SUNAT), y el cálculo cambia: C121 Impuesto a la Renta: S/. (cálculo 
+automático de C120 * C123), C122: IR estimado (1%): S/. (solo se muestra como 
+referencia comparativa del 1%, ya no se usa en el cálculo final). entonces el          
+total a 
+pagar sería  IGV del periodo a pagar: S/. (ese cálculo ya lo hiciste, pones el mismo), 
+C121 Impuesto a la renta: S/. (cálculo automático de C120 * C123,  C126: Multas e 
+intereses: S/ (el contador agrega manualmente si es que hubiese), C140: Total a pagar : 
+(suma automática de IGV del periodo a pagar + C121 Impuesto a la Renta + C126: 
+Multas e intereses). En caso de Régimen general, C120: Ingresos netos del mes: S/, (es 
+lo mismo que C100: Ingresos gravado), C123: Coeficiente aplicado (el contador pone el 
+coeficiente), C121 IR mensual: S/ ( C120 × C123), entonces          
+Total a pagar, IGV del 
+periodo a pagar: S/. (ese cálculo ya lo hiciste, pones el mismo) C121 Impuesto a la 
+Renta (C121 IR mensual ), C126: Multas e intereses: S/ (el contador agrega 
+manualmente si es que hubiese), C140: Total a pagar : (suma automática de IGV del 
+periodo a pagar + C121: Impuesto a la Renta + C126: Multas e intereses).       
+Enviar 
+Declaración       
+Ajustar Manual, Cancelar, Descargar(formato pdf) click cancelar, 
+desaparece. Si envía declaración, se cierra el panel y en el estado de la respectiva 
+declaración a la que dio Enviar declaración, cambia de estado pendiente a estado en 
+proceso, solo para la vista del contador, debido a que en el modulo de declaraciones 
+del cliente respectivo solo se maneja pendiente y presentado), cuando está el estado 
+en proceso aparecen opciones de cargar y dar como presentado, en cargar debe subir 
+los archivos de la declaración descargada en pdf y otro pdf, luego el contador puede 
+dar como presentada esta declaración, una vez presentada se quitan las opciones de 
+cargar y presentar y aparece las opcion de descargar los archivos. Así mismo cuándo da 
+como presentada, debe crearse automáticamente la obligación relacionada a esta 
+declaración, que se mostrará en el módulo de Pagos y Declaraciones en el panel del 
+contador, Las obligaciones se verá con los siguientes datos, Tipo(carga automática de 
+acuerdo al tipo de declaración), periodo (que es el mismo de la declaración, se carga 
+automáticamente), nombre del cliente(el cliente al que se hizo la declaración, ya sea su 
+nombre o razón social), fecha límite (es la misma fecha límite que de la declaración), 
+Monto (monto automático que carga de la declaración que se hizo y se encuentra en 
+C140 Total a pagar), Estado (Pendiente (por defecto, antes que se haga el pago), 
+vencidas, pagadas) , botón pagar (puede pagar tanto el contador como el cliente), así 
+mismo esta obligación se genera al cliente para que lo vea cuando inicie sesión es su 
+modulo de obligaciones y pagos, el cliente puede ver esto en su obligación generada 
+Tipo, Periodo, Fecha Límite, Monto, Estado,  boton Ver Detalle,  botón pagar. Ahora 
+como te das cuenta, tanto el cliente como contador pueden hacer el pago. Empecemos 
+con contador que hace el pago presiona el botón de pagar, sale el formulario Registrar 
+Pago de Obligación, Concepto:(Periodo de obligación tipo de obligación<-campo 
+bloqueado), cliente: (sale el cliente o razon social automático <- campo bloqueado), 
+Monto: [______], Fecha de Pago: [selector de fecha], Medio de pago: [_____] , 
+Comprobante: [        
+Subir archivo] [       
+Guardar]    [❌ Cancelar]. Cuándo se da guardar 
+se actualiza el estado a pagado y se quita la opción pagar tanto para el cliente y 
+contador, y allí aparece ver comprobante. También se muestra en Pagos del respectivo 
+cliente, es decir cuando se da seleccionar en Pagos (me refiero a dentro del ver panel 
+en la gestión de clientes que , En la parte inferior a ese encabezado una barra 
+horizontal, con Resumen, Ingresos, Egresos, Declaraciones, Pagos, cuando seleccione 
+Pagos se verá Concepto(tipo de la obligación – periodo de la obligación), fecha de pago 
+(mismo de obligación), monto (mismo de obligación), Estado (si el contador hace el 
+pago, queda como registrado), descargar comprobante, y ojito (para ver detalles 
+completo del pago, la obligación a la que está asociado y la declaración a la que está 
+asociada). Y cuando este mismo cliente inicia sesión o ya tiene iniciada su sesión 
+simplemente se actualiza la obligación (te expliqué anteriormente). Ahora si el cliente 
+hace el pago, cuando el contador entre a gestion de clientes, botón ver panel, de ese 
+cliente respectivo seleccionará pagos y verá. Tipo, periodo, fecha de pago, monto, 
+Estado, por validar, botón validar, ahora cuando el contador presiona el botón validar, 
+le sale lo siguiente: Detalles del pago, Cliente: (cliente que hizo el pago, Concepto: 
+(Periodo Tipo), Monto: (), Fecha: 10/08/2025, Medio de pago: (medio respectivo,         
+Constancia adjunta: [Ver archivo], todos esos campos deben cargar automáticamente 
+de acuerdo al pago que hizo el cliente, Comentarios: (opcional, el contador puede 
+llenar ese campo, y se nvíe a cliente y le aparezca en observaciones)[Confirmar 
+pago][Rechazar][ Editar datos] Al confirmar: Estado cambia a “✅ Validado”, Se enlaza 
+automáticamente con la declaración del mismo periodo, Se notifica al cliente: “Tu 
+contador ha validado tu pago del periodo Julio 2025.”,        
+Si lo rechaza, El contador 
+puede dejar comentario:“Monto incorrecto. El impuesto fue de S/ 312, no S/ 285.” 
+Cliente verá en notificaciones: “Tu pago fue rechazado. Revisa el comentario de tu 
+contador y vuelve a registrarlo si es necesario.” Si se valida: cambia a "validado" y solo 
+se muestra [Ver Comprobante],Si se rechaza: vuelve al estado de Pendiente o se 
+notifica al cliente. En el botón Editar, que solo permita modificar: monto, fecha y 
+banco del pago (no la obligación en sí.El módulo de Pagos y declaraciones, ya se 
+mencionó anteriormente, para los clientes que llevan declaraciones, para los clientes 
+que están en NRUS, , se muestra Periodo(automático por el sistema), Cuota 
+Mensual(debe calcular automáticamente cuánto es la cuota que debe pagar el cliente 
+de acuerdo a Categoría 1 Total de ingresos es ≤ S/ 1,700 → cuota = S/ 20 , Categoría 2 
+Total de ingresos es ≤ S/ 2,500 → cuota = S/ 50, Categoría 3 Total de ingresos ≤ S/ 
+3,500 → cuota = S/ 100 categoría 4 Total de ingresos ≤ S/ 5,000 → cuota = S/ 150, 
+Categoría 5 Total de ingresos > 8000 -> cuota :    
+excedido,) Estado (pendiente, 
+mientras no esté en categoría 5 y no se haga el pago, pendiente, si está en categoría 5, 
+es decir se excedió los 8000, No Disponible) , fecha límite (el sistema lo calcula, de 
+acuerdo a los clientes del NRUS, pueden pagar Hasta el día 5 hábil del mes siguiente al 
+que corresponde el pago), Observaciones (Si está dentro del límite: — o Sin 
+observaciones, Si se pasa del límite:     
+Exceso detectado – No puede pagar cuota fija. 
+Si aún no carga ingresos ese mes (pendiente):        
+En espera de ingresos para validar 
+límite.), Estado (Cumplido si se paga a tiempo, atrasado si se paga después o no 
+cumplido si no se paga), Acciones (pagar, mientras no esté en categoría 5, cuándo de 
+pagar debe abrirse un formulario con Pago de Obligación, Concepto: Cuota Mensual, 
+Periodo: 06/2024, Monto a pagar: S/_ [12/07/2024] ← Fecha del sistema o editable, 
+Medio de pago:  [Transferencia / Interbank / BCP / Yape],        
+voucher ]          
+Adjuntar archivo: [ Subir 
+Comentario: [ Campo opcional ] [ Cancelar ]    [ Confirmar pago ]), si da 
+confirmar pago, Se actualiza la obligación relacionada, estado = Pagada. Puede pagar 
+tanto el contador como cliente, y se cambia el estado = pagada, también los pagos 
+pueden verse de la misma forma que para los otros clientes, de los otros régimenes. 
+Adicional debe haber un botón de registrar obligación, para que se muestre al cliente 
+cuando inicie sesión en su respectivo módulo de pagos y obligaciones, estas 
+obligaciones que se crean, no necesariamente están sujetas a declaraciones, pero si a 
+sus pagos respectivos, nueva declaración, se muestra un formulario para registrar la 
+obligación, y enviar la obligación al respectivo cliente al que se hizo la obligación. 

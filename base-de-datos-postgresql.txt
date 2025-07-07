@@ -1,0 +1,129 @@
+CREATE TABLE usuario (
+    id_usuario BIGSERIAL PRIMARY KEY,
+    username VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    nombres VARCHAR(50),
+    apellidos VARCHAR(50),
+    rol VARCHAR(50) NOT NULL, -- 'ADMINISTRADOR', 'CLIENTE', 'CONTADOR'
+    estado BOOLEAN NOT NULL DEFAULT TRUE
+);
+
+CREATE TABLE contador (
+    id_contador BIGSERIAL PRIMARY KEY,
+    nombres VARCHAR(50) NOT NULL,
+    apellidos VARCHAR(50) NOT NULL,
+    dni VARCHAR(8) UNIQUE NOT NULL,
+    telefono VARCHAR(9) NOT NULL,
+    email VARCHAR(100),
+    especialidad VARCHAR(100),
+    nro_colegiatura VARCHAR(50),
+    id_usuario BIGINT UNIQUE REFERENCES usuario(id_usuario) ON DELETE SET NULL
+);
+
+CREATE TABLE cliente (
+    id_cliente BIGSERIAL PRIMARY KEY,
+    nombres VARCHAR(50) NOT NULL,
+    apellidos VARCHAR(50),
+    ruc_dni VARCHAR(11) UNIQUE NOT NULL,
+    email VARCHAR(100),
+    telefono VARCHAR(9) NOT NULL,
+    tipo_ruc VARCHAR(50),
+    regimen VARCHAR(50),
+    tipo_cliente VARCHAR(50) NOT NULL, -- 'PERSONA_NATURAL', 'PERSONA_JURIDICA'
+    id_usuario BIGINT UNIQUE REFERENCES usuario(id_usuario) ON DELETE SET NULL,
+    id_contador BIGINT REFERENCES contador(id_contador) ON DELETE SET NULL
+);
+
+-- ========= TABLAS PRINCIPALES DEL SISTEMA =========
+
+-- Tabla para almacenar los ingresos registrados por los clientes
+CREATE TABLE ingreso (
+    id_ingreso BIGSERIAL PRIMARY KEY,
+    id_cliente BIGINT NOT NULL REFERENCES cliente(id_cliente) ON DELETE CASCADE,
+    monto DECIMAL(12, 2) NOT NULL,
+    fecha DATE NOT NULL,
+    descripcion TEXT,
+    nro_comprobante VARCHAR(50),
+    url_comprobante VARCHAR(255),
+    tipo_tributario VARCHAR(20) DEFAULT 'GRAVADA' CHECK (tipo_tributario IN ('GRAVADA', 'EXONERADA', 'INAFECTA')),
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabla para almacenar los egresos registrados por los clientes
+CREATE TABLE egreso (
+    id_egreso BIGSERIAL PRIMARY KEY,
+    id_cliente BIGINT NOT NULL REFERENCES cliente(id_cliente) ON DELETE CASCADE,
+    monto DECIMAL(12, 2) NOT NULL,
+    fecha DATE NOT NULL,
+    descripcion TEXT,
+    nro_comprobante VARCHAR(50),
+    url_comprobante VARCHAR(255),
+    tipo_contabilidad VARCHAR(20) CHECK (tipo_contabilidad IN ('COSTO', 'GASTO')),
+    tipo_tributario VARCHAR(20) DEFAULT 'GRAVADA' CHECK (tipo_tributario IN ('GRAVADA', 'EXONERADA', 'INAFECTA')),
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabla para gestionar las declaraciones mensuales de los clientes
+CREATE TABLE declaracion (
+    id_declaracion BIGSERIAL PRIMARY KEY,
+    id_cliente BIGINT NOT NULL REFERENCES cliente(id_cliente) ON DELETE RESTRICT,
+    periodo_tributario DATE NOT NULL,
+    tipo VARCHAR(100) NOT NULL,
+    estado_cliente VARCHAR(20) DEFAULT 'PENDIENTE' CHECK (estado_cliente IN ('PENDIENTE', 'PRESENTADO')),
+    estado_contador VARCHAR(20) DEFAULT 'PENDIENTE' CHECK (estado_contador IN ('PENDIENTE', 'EN PROCESO', 'PRESENTADO')),
+    fecha_limite DATE,
+    url_constancia_declaracion VARCHAR(255),
+    url_constancia_pago VARCHAR(255),
+    total_ingresos DECIMAL(12, 2),
+    total_egresos DECIMAL(12, 2),
+    utilidad_estimada DECIMAL(12, 2),
+    igv_ventas DECIMAL(10, 2),
+    igv_compras DECIMAL(10, 2),
+    ir_estimado DECIMAL(10, 2),
+    total_pagar_declaracion DECIMAL(12, 2),
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(id_cliente, periodo_tributario, tipo)
+);
+
+-- Tabla para las obligaciones de pago generadas
+CREATE TABLE obligacion (
+    id_obligacion BIGSERIAL PRIMARY KEY,
+    id_declaracion BIGINT REFERENCES declaracion(id_declaracion) ON DELETE SET NULL,
+    id_cliente BIGINT NOT NULL REFERENCES cliente(id_cliente) ON DELETE CASCADE,
+    tipo VARCHAR(100) NOT NULL,
+    periodo DATE NOT NULL,
+    monto DECIMAL(12, 2) NOT NULL,
+    fecha_limite DATE,
+    estado VARCHAR(30) DEFAULT 'PENDIENTE' CHECK (estado IN ('PENDIENTE', 'PAGADA', 'PAGADA_CON_RETRASO', 'VENCIDA', 'NO_DISPONIBLE')),
+    observaciones TEXT,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabla para registrar los pagos de las obligaciones
+CREATE TABLE pago (
+    id_pago BIGSERIAL PRIMARY KEY,
+    id_obligacion BIGINT NOT NULL UNIQUE REFERENCES obligacion(id_obligacion) ON DELETE CASCADE,
+    monto_pagado DECIMAL(12, 2) NOT NULL,
+    fecha_pago DATE NOT NULL,
+    medio_pago VARCHAR(30) CHECK (medio_pago IN ('TRANSFERENCIA', 'INTERBANK', 'BCP', 'YAPE', 'NPS', 'BANCO', 'APP')),
+    url_voucher VARCHAR(255),
+    estado VARCHAR(20) NOT NULL CHECK (estado IN ('POR_VALIDAR', 'VALIDADO', 'RECHAZADO', 'REGISTRADO')),
+    pagado_por VARCHAR(20) NOT NULL CHECK (pagado_por IN ('CLIENTE', 'CONTADOR')),
+    comentario_contador TEXT,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+-- ========= ÍNDICES PARA OPTIMIZAR CONSULTAS =========
+
+CREATE INDEX idx_ingreso_cliente_fecha ON ingreso(id_cliente, fecha);
+CREATE INDEX idx_egreso_cliente_fecha ON egreso(id_cliente, fecha);
+CREATE INDEX idx_declaracion_cliente_periodo ON declaracion(id_cliente, periodo_tributario);
+CREATE INDEX idx_obligacion_cliente_periodo ON obligacion(id_cliente, periodo);
+CREATE INDEX idx_pago_obligacion ON pago(id_obligacion);
+
