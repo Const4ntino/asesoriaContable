@@ -3,6 +3,7 @@ package com.asesoria.contable.app_ac.controller;
 import com.asesoria.contable.app_ac.exceptions.ClienteNotFoundException;
 import com.asesoria.contable.app_ac.exceptions.ContadorNotFoundException;
 import com.asesoria.contable.app_ac.exceptions.UsuarioNotFoundException;
+import com.asesoria.contable.app_ac.exceptions.IngresoNotFoundException;
 import com.asesoria.contable.app_ac.model.ErrorResponse;
 import com.asesoria.contable.app_ac.utils.enums.ErrorCatalog;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -18,6 +19,7 @@ import java.util.Collections;
 import java.util.stream.Collectors;
 
 import static com.asesoria.contable.app_ac.utils.enums.ErrorCatalog.*;
+import static com.asesoria.contable.app_ac.utils.enums.ErrorCatalog.INGRESO_NOT_FOUND;
 
 @RestControllerAdvice
 public class GlobalControllerAdvice {
@@ -52,6 +54,17 @@ public class GlobalControllerAdvice {
                 .codigo(USUARIO_NO_ENCONTRADO.getCodigo())
                 .status(HttpStatus.NOT_FOUND)
                 .mensaje(USUARIO_NO_ENCONTRADO.getMensaje())
+                .marcaDeTiempo(LocalDateTime.now())
+                .build();
+    }
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(IngresoNotFoundException.class)
+    public ErrorResponse handlerIngresoNotFoundException() {
+        return ErrorResponse.builder()
+                .codigo(INGRESO_NOT_FOUND.getCodigo())
+                .status(HttpStatus.NOT_FOUND)
+                .mensaje(INGRESO_NOT_FOUND.getMensaje())
                 .marcaDeTiempo(LocalDateTime.now())
                 .build();
     }

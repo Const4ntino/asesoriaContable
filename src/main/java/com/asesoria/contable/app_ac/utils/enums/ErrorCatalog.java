@@ -14,6 +14,8 @@ public enum ErrorCatalog {
     USUARIO_NO_ENCONTRADO("ERROR_USUARIO_01", "Usuario no encontrado"),
     USUARIO_DATOS_INVALIDOS("ERROR_USUARIO_02", "Datos inválidos para Usuario"),
 
+    INGRESO_NOT_FOUND("ERROR_INGRESO_01", "Ingreso no encontrado"),
+
     ERROR_GENERICO("ERROR_GENERICO", "Un error inesperado a ocurrido");
 
     private final String codigo;
