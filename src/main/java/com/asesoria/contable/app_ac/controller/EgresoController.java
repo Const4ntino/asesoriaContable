@@ -108,41 +108,7 @@ public class EgresoController {
         return ResponseEntity.ok(ingresos);
     }
 
-    @PreAuthorize("hasRole('CLIENTE')")
-    @GetMapping("/mis-egresos/metricas")
-    public Map<String, Object> obtenerMetricasEgresos(@AuthenticationPrincipal Usuario usuario) {
-        Cliente cliente = clienteService.findByUsuarioId(usuario.getId());
 
-        // Solo proceder si el cliente es NRUS
-        if (!"NRUS".equals(cliente.getRegimen())) {
-            throw new AccessDeniedException("Endpoint solo disponible para clientes NRUS");
-        }
-
-        Map<String, Object> metricas = new HashMap<>();
-
-        // Total mes actual
-        BigDecimal totalMesActual = egresoService.calcularTotalMesActual(cliente.getId());
-        metricas.put("totalMesActual", totalMesActual);
-
-        // Desglose por tipo de contabilidad
-        Map<String, BigDecimal> egresosPorTipoContabilidad = egresoService.obtenerEgresosPorTipoContabilidad(cliente.getId());
-        metricas.put("egresosPorTipoContabilidad", egresosPorTipoContabilidad);
-
-        // Balance mensual (requiere datos de ingresos)
-        BigDecimal totalIngresosMesActual = ingresoService.calcularTotalMesActual(cliente.getId());
-        BigDecimal balanceMensual = totalIngresosMesActual.subtract(totalMesActual);
-        metricas.put("balanceMensual", balanceMensual);
-
-        // Egresos recurrentes
-        List<Map<String, Object>> egresosRecurrentes = egresoService.identificarEgresosRecurrentes(cliente.getId());
-        metricas.put("egresosRecurrentes", egresosRecurrentes);
-
-        // Egresos por proveedor
-        Map<String, BigDecimal> egresosPorProveedor = egresoService.obtenerEgresosPorProveedor(cliente.getId());
-        metricas.put("egresosPorProveedor", egresosPorProveedor);
-
-        return metricas;
-    }
 
 
 }
