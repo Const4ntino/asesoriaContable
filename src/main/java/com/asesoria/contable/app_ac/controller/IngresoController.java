@@ -155,6 +155,10 @@ public class IngresoController {
         BigDecimal totalMesActual = ingresoService.calcularTotalMesActual(cliente.getId());
         metricas.put("totalMesActual", totalMesActual);
 
+        // Total mes anterior
+        BigDecimal totalMesAnterior = ingresoService.calcularTotalMesAnterior(cliente.getId());
+        metricas.put("totalMesAnterior", totalMesAnterior);
+
         // Desglose por tipo tributario
         Map<String, BigDecimal> ingresosPorTipoTributario = ingresoService.obtenerIngresosPorTipoTributario(cliente.getId());
         metricas.put("ingresosPorTipoTributario", ingresosPorTipoTributario);

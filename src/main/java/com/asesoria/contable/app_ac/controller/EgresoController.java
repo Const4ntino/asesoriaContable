@@ -123,6 +123,10 @@ public class EgresoController {
         BigDecimal totalMesActual = egresoService.calcularTotalMesActual(cliente.getId());
         metricas.put("totalMesActual", totalMesActual);
 
+        // Total mes anterior
+        BigDecimal totalMesAnterior = egresoService.calcularTotalMesAnterior(cliente.getId());
+        metricas.put("totalMesAnterior", totalMesAnterior);
+
         // Desglose por tipo de contabilidad
         Map<String, BigDecimal> egresosPorTipoContabilidad = egresoService.obtenerEgresosPorTipoContabilidad(cliente.getId());
         metricas.put("egresosPorTipoContabilidad", egresosPorTipoContabilidad);
@@ -154,6 +158,10 @@ public class EgresoController {
         // Total de egresos del mes actual
         BigDecimal totalMesActual = egresoService.calcularTotalMesActual(cliente.getId());
         metricas.put("totalMesActual", totalMesActual);
+
+        // Total mes anterior
+        BigDecimal totalMesAnterior = egresoService.calcularTotalMesAnterior(cliente.getId());
+        metricas.put("totalMesAnterior", totalMesAnterior);
 
         // Desglose por tipo de contabilidad (COSTO, GASTO)
         Map<String, BigDecimal> egresosPorTipoContabilidad = egresoService.obtenerEgresosPorTipoContabilidad(cliente.getId());

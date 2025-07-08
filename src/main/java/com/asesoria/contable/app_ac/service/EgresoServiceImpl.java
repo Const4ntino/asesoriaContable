@@ -193,6 +193,14 @@ public class EgresoServiceImpl implements EgresoService {
     }
 
     @Override
+    public BigDecimal calcularTotalMesAnterior(Long clienteId) {
+        YearMonth mesAnterior = YearMonth.now().minusMonths(1);
+        LocalDate inicioMes = mesAnterior.atDay(1);
+        LocalDate finMes = mesAnterior.atEndOfMonth();
+        return egresoRepository.sumMontoByClienteIdAndFechaBetween(clienteId, inicioMes, finMes);
+    }
+
+    @Override
     public Map<String, BigDecimal> obtenerEgresosPorTipoContabilidad(Long clienteId) {
         List<Object[]> resultados = egresoRepository.sumRawByTipoContabilidad(clienteId);
 

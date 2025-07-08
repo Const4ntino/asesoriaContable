@@ -25,6 +25,7 @@ public interface EgresoService {
 
     // PARA MÉTRICAS
     BigDecimal calcularTotalMesActual(Long clienteId);
+    BigDecimal calcularTotalMesAnterior(Long clienteId);
     Map<String, BigDecimal> obtenerEgresosPorTipoContabilidad(Long clienteId);
     Map<String, BigDecimal> obtenerEgresosPorTipoTributario(Long clienteId);
     List<Map<String, Object>> identificarEgresosRecurrentes(Long clienteId);
