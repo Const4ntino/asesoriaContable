@@ -20,8 +20,8 @@ public class IngresoRequest {
     @DecimalMin(value = "0.0", inclusive = false)
     private BigDecimal monto;
 
+    //@DecimalMin(value = "0.0", inclusive = false)
     @NotNull
-    @DecimalMin(value = "0.0", inclusive = false)
     private BigDecimal montoIgv;
 
     @NotNull

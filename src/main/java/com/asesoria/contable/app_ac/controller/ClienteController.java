@@ -2,11 +2,13 @@ package com.asesoria.contable.app_ac.controller;
 
 import com.asesoria.contable.app_ac.model.dto.ClienteRequest;
 import com.asesoria.contable.app_ac.model.dto.ClienteResponse;
+import com.asesoria.contable.app_ac.model.entity.Usuario;
 import com.asesoria.contable.app_ac.service.ClienteService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -63,6 +65,13 @@ public class ClienteController {
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         clienteService.deleteById(id);
+    }
+
+    // Proteger esta URI con JWT
+    @PreAuthorize("hasRole('CLIENTE')")
+    @GetMapping("/encontrarme")
+    public ClienteResponse findByUsuario(@AuthenticationPrincipal Usuario usuario) {
+        return clienteService.findByUsuarioId(usuario.getId());
     }
 
     @PreAuthorize("hasRole('ADMINISTRADOR')")
