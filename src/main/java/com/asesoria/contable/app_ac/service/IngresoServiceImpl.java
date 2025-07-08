@@ -18,7 +18,9 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -179,6 +181,44 @@ public class IngresoServiceImpl implements IngresoService {
                 .stream()
                 .map(ingresoMapper::toIngresoResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public BigDecimal calcularTotalMesActual(Long clienteId) {
+        YearMonth mesActual = YearMonth.now();
+        LocalDate inicioMes = mesActual.atDay(1);
+        LocalDate finMes = mesActual.atEndOfMonth();
+        return ingresoRepository.sumMontoByClienteIdAndFechaBetween(clienteId, inicioMes, finMes);
+    }
+
+    @Override
+    public BigDecimal calcularTotalMesAnterior(Long clienteId) {
+        YearMonth mesAnterior = YearMonth.now().minusMonths(1);
+        LocalDate inicioMes = mesAnterior.atDay(1);
+        LocalDate finMes = mesAnterior.atEndOfMonth();
+        return ingresoRepository.sumMontoByClienteIdAndFechaBetween(clienteId, inicioMes, finMes);
+    }
+
+    @Override
+    public Map<String, BigDecimal> obtenerIngresosPorCategoria(Long clienteId) {
+        return ingresoRepository.sumMontoByCategoria(clienteId).stream()
+                .collect(Collectors.toMap(
+                        map -> (String) map.get("categoria"),
+                        map -> (BigDecimal) map.get("total")
+                ));
+    }
+
+    @Override
+    public BigDecimal calcularIngresosPendientes(Long clienteId) {
+        return ingresoRepository.sumMontoByClienteIdAndEstadoPagoPendiente(clienteId);
+    }
+
+    @Override
+    public Long contarComprobantesMesActual(Long clienteId) {
+        YearMonth mesActual = YearMonth.now();
+        LocalDate inicioMes = mesActual.atDay(1);
+        LocalDate finMes = mesActual.atEndOfMonth();
+        return ingresoRepository.countByClienteIdAndFechaBetween(clienteId, inicioMes, finMes);
     }
 }
 

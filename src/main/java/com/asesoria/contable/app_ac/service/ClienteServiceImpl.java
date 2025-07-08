@@ -261,4 +261,10 @@ public class ClienteServiceImpl implements ClienteService {
                 .map(clienteMapper::toClienteResponse)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public Cliente findEntityByUsuarioId(Long usuarioId) {
+        return clienteRepository.findByUsuarioId(usuarioId)
+                .orElseThrow(ClienteNotFoundException::new);
+    }
 }

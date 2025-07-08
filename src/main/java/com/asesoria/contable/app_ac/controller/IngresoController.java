@@ -2,19 +2,26 @@ package com.asesoria.contable.app_ac.controller;
 
 import com.asesoria.contable.app_ac.model.dto.IngresoRequest;
 import com.asesoria.contable.app_ac.model.dto.IngresoResponse;
+import com.asesoria.contable.app_ac.model.entity.Cliente;
 import com.asesoria.contable.app_ac.model.entity.Usuario;
+import com.asesoria.contable.app_ac.service.ClienteService;
 import com.asesoria.contable.app_ac.service.IngresoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/ingresos")
@@ -22,6 +29,7 @@ import java.util.List;
 public class IngresoController {
 
     private final IngresoService ingresoService;
+    private final ClienteService clienteService;
 
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     @GetMapping("/{id}")
@@ -89,6 +97,50 @@ public class IngresoController {
     public ResponseEntity<List<IngresoResponse>> getMyIngresos(@AuthenticationPrincipal Usuario usuario) {
         List<IngresoResponse> ingresos = ingresoService.findByUsuarioId(usuario.getId());
         return ResponseEntity.ok(ingresos);
+    }
+
+    @PreAuthorize("hasRole('CLIENTE')")
+    @GetMapping("/mis-ingresos/metricas")
+    public Map<String, Object> obtenerMetricasIngresos(@AuthenticationPrincipal Usuario usuario) {
+        Cliente cliente = clienteService.findEntityByUsuarioId(usuario.getId());
+
+        // Solo proceder si el cliente es NRUS
+        if (!"NRUS".equals(cliente.getRegimen())) {
+            throw new AccessDeniedException("Endpoint solo disponible para clientes NRUS");
+        }
+
+        Map<String, Object> metricas = new HashMap<>();
+
+        // Total mes actual
+        BigDecimal totalMesActual = ingresoService.calcularTotalMesActual(cliente.getId());
+        metricas.put("totalMesActual", totalMesActual);
+
+        // Total mes anterior
+        BigDecimal totalMesAnterior = ingresoService.calcularTotalMesAnterior(cliente.getId());
+        metricas.put("totalMesAnterior", totalMesAnterior);
+
+        // Variación porcentual
+        BigDecimal variacion = BigDecimal.ZERO;
+        if (totalMesAnterior.compareTo(BigDecimal.ZERO) > 0) {
+            variacion = totalMesActual.subtract(totalMesAnterior)
+                    .divide(totalMesAnterior, 4, RoundingMode.HALF_UP)
+                    .multiply(new BigDecimal(100));
+        }
+        metricas.put("variacionPorcentual", variacion);
+
+        // Ingresos por categoría (ejemplo)
+        Map<String, BigDecimal> ingresosPorCategoria = ingresoService.obtenerIngresosPorCategoria(cliente.getId());
+        metricas.put("ingresosPorCategoria", ingresosPorCategoria);
+
+        // Ingresos pendientes
+        BigDecimal ingresosPendientes = ingresoService.calcularIngresosPendientes(cliente.getId());
+        metricas.put("ingresosPendientes", ingresosPendientes);
+
+        // Contador de comprobantes
+        Long cantidadComprobantes = ingresoService.contarComprobantesMesActual(cliente.getId());
+        metricas.put("cantidadComprobantes", cantidadComprobantes);
+
+        return metricas;
     }
 
     // Filtrar ingresos por cliente

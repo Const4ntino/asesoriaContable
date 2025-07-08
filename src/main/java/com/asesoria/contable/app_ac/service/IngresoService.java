@@ -4,8 +4,10 @@ import com.asesoria.contable.app_ac.model.dto.IngresoRequest;
 import com.asesoria.contable.app_ac.model.dto.IngresoResponse;
 import com.asesoria.contable.app_ac.model.entity.Usuario;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 public interface IngresoService {
 
@@ -20,4 +22,14 @@ public interface IngresoService {
     List<IngresoResponse> findByClienteId(Long clienteId);
     List<IngresoResponse> findByClienteIdAndFechaBetween(Long clienteId, LocalDate startDate, LocalDate endDate);
     List<IngresoResponse> findByUsuarioId(Long usuarioId);
+
+    BigDecimal calcularTotalMesActual(Long clienteId);
+
+    BigDecimal calcularTotalMesAnterior(Long clienteId);
+
+    Map<String, BigDecimal> obtenerIngresosPorCategoria(Long clienteId);
+
+    BigDecimal calcularIngresosPendientes(Long clienteId);
+
+    Long contarComprobantesMesActual(Long clienteId);
 }

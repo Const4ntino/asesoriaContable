@@ -2,6 +2,7 @@ package com.asesoria.contable.app_ac.service;
 
 import com.asesoria.contable.app_ac.model.dto.ContadorRequest;
 import com.asesoria.contable.app_ac.model.dto.ContadorResponse;
+import com.asesoria.contable.app_ac.model.entity.Cliente;
 
 import java.util.List;
 
@@ -14,4 +15,5 @@ public interface ContadorService {
     ContadorResponse update(Long id, ContadorRequest request);
     void deleteById(Long id);
     List<ContadorResponse> searchContadores(String searchTerm, String sortBy, String sortOrder);
+
 }
