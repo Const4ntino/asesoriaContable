@@ -11,13 +11,16 @@ import org.mapstruct.MappingTarget;
 public interface IngresoMapper {
 
     @Mapping(target = "cliente", ignore = true)
+    @Mapping(target = "montoIgv", ignore = true)
     Ingreso toIngreso(IngresoRequest request);
 
     @Mapping(target = "cliente", source = "cliente")
+    @Mapping(target = "montoIgv", source = "montoIgv")
     IngresoResponse toIngresoResponse(Ingreso ingreso);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "cliente", ignore = true)
+    @Mapping(target = "montoIgv", ignore = true)
     @Mapping(target = "fechaCreacion", ignore = true)
     @Mapping(target = "fechaActualizacion", ignore = true)
     void updateIngresoFromRequest(IngresoRequest request, @MappingTarget Ingreso ingreso);

@@ -7,11 +7,17 @@ import com.asesoria.contable.app_ac.model.dto.IngresoRequest;
 import com.asesoria.contable.app_ac.model.dto.IngresoResponse;
 import com.asesoria.contable.app_ac.model.entity.Cliente;
 import com.asesoria.contable.app_ac.model.entity.Ingreso;
+import com.asesoria.contable.app_ac.model.entity.Usuario;
 import com.asesoria.contable.app_ac.repository.ClienteRepository;
 import com.asesoria.contable.app_ac.repository.IngresoRepository;
+import com.asesoria.contable.app_ac.utils.enums.Regimen;
+import com.asesoria.contable.app_ac.utils.enums.TipoTributario;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,6 +28,8 @@ public class IngresoServiceImpl implements IngresoService {
     private final IngresoRepository ingresoRepository;
     private final ClienteRepository clienteRepository;
     private final IngresoMapper ingresoMapper;
+
+    private static final BigDecimal IGV_RATE = new BigDecimal("0.18");
 
     @Override
     public IngresoResponse findById(Long id) {
@@ -46,6 +54,15 @@ public class IngresoServiceImpl implements IngresoService {
         Ingreso ingreso = ingresoMapper.toIngreso(request);
         ingreso.setCliente(cliente);
 
+        // Lógica para calcular IGV
+        if (request.getTipoTributario() == TipoTributario.GRAVADA &&
+                cliente.getRegimen() != Regimen.NRUS) {
+
+            ingreso.setMontoIgv(request.getMonto().multiply(IGV_RATE));
+        } else {
+            ingreso.setMontoIgv(BigDecimal.ZERO);
+        }
+
         Ingreso ingresoGuardado = ingresoRepository.save(ingreso);
         return ingresoMapper.toIngresoResponse(ingresoGuardado);
     }
@@ -61,6 +78,15 @@ public class IngresoServiceImpl implements IngresoService {
         ingresoMapper.updateIngresoFromRequest(request, ingreso);
         ingreso.setCliente(cliente);
 
+        // Lógica para calcular el IGV solo si es GRAVADA y el cliente NO es NRUS
+        if (request.getTipoTributario() == TipoTributario.GRAVADA &&
+                cliente.getRegimen() != Regimen.NRUS) {
+
+            ingreso.setMontoIgv(request.getMonto().multiply(IGV_RATE));
+        } else {
+            ingreso.setMontoIgv(BigDecimal.ZERO);
+        }
+
         Ingreso ingresoActualizado = ingresoRepository.save(ingreso);
         return ingresoMapper.toIngresoResponse(ingresoActualizado);
     }
@@ -72,4 +98,87 @@ public class IngresoServiceImpl implements IngresoService {
         }
         ingresoRepository.deleteById(id);
     }
+
+    @Override
+    public IngresoResponse saveByUsuario(IngresoRequest request, Usuario usuario) {
+        Cliente cliente = clienteRepository.findByUsuarioId(usuario.getId())
+                .orElseThrow(ClienteNotFoundException::new);
+
+        Ingreso ingreso = ingresoMapper.toIngreso(request);
+        ingreso.setCliente(cliente);
+
+        if (request.getTipoTributario() == TipoTributario.GRAVADA && cliente.getRegimen() != Regimen.NRUS) {
+            ingreso.setMontoIgv(request.getMonto().multiply(IGV_RATE));
+        } else {
+            ingreso.setMontoIgv(BigDecimal.ZERO);
+        }
+
+        return ingresoMapper.toIngresoResponse(ingresoRepository.save(ingreso));
+    }
+
+    @Override
+    public IngresoResponse updateMyIngreso(Long id, IngresoRequest request, Usuario usuario) {
+        Cliente cliente = clienteRepository.findByUsuarioId(usuario.getId())
+                .orElseThrow(ClienteNotFoundException::new);
+
+        Ingreso ingreso = ingresoRepository.findById(id)
+                .orElseThrow(IngresoNotFoundException::new);
+
+        if (!ingreso.getCliente().getId().equals(cliente.getId())) {
+            throw new AccessDeniedException("No puedes modificar este ingreso.");
+        }
+
+        ingresoMapper.updateIngresoFromRequest(request, ingreso);
+        ingreso.setCliente(cliente);
+
+        if (request.getTipoTributario() == TipoTributario.GRAVADA && cliente.getRegimen() != Regimen.NRUS) {
+            ingreso.setMontoIgv(request.getMonto().multiply(IGV_RATE));
+        } else {
+            ingreso.setMontoIgv(BigDecimal.ZERO);
+        }
+
+        return ingresoMapper.toIngresoResponse(ingresoRepository.save(ingreso));
+    }
+
+    @Override
+    public void deleteMyIngreso(Long id, Usuario usuario) {
+        Cliente cliente = clienteRepository.findByUsuarioId(usuario.getId())
+                .orElseThrow(ClienteNotFoundException::new);
+
+        Ingreso ingreso = ingresoRepository.findById(id)
+                .orElseThrow(IngresoNotFoundException::new);
+
+        if (!ingreso.getCliente().getId().equals(cliente.getId())) {
+            throw new AccessDeniedException("No puedes eliminar este ingreso.");
+        }
+
+        ingresoRepository.deleteById(id);
+    }
+
+    @Override
+    public List<IngresoResponse> findByClienteId(Long clienteId) {
+        return ingresoRepository.findByClienteId(clienteId)
+                .stream()
+                .map(ingresoMapper::toIngresoResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<IngresoResponse> findByClienteIdAndFechaBetween(Long clienteId, LocalDate startDate, LocalDate endDate) {
+        return ingresoRepository.findByClienteIdAndFechaBetween(clienteId, startDate, endDate)
+                .stream()
+                .map(ingresoMapper::toIngresoResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<IngresoResponse> findByUsuarioId(Long usuarioId) {
+        Cliente cliente = clienteRepository.findByUsuarioId(usuarioId)
+                .orElseThrow(ClienteNotFoundException::new);
+        return ingresoRepository.findByClienteId(cliente.getId())
+                .stream()
+                .map(ingresoMapper::toIngresoResponse)
+                .collect(Collectors.toList());
+    }
 }
+

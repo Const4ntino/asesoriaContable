@@ -2,7 +2,9 @@ package com.asesoria.contable.app_ac.service;
 
 import com.asesoria.contable.app_ac.model.dto.IngresoRequest;
 import com.asesoria.contable.app_ac.model.dto.IngresoResponse;
+import com.asesoria.contable.app_ac.model.entity.Usuario;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface IngresoService {
@@ -10,6 +12,12 @@ public interface IngresoService {
     IngresoResponse findById(Long id);
     List<IngresoResponse> findAll();
     IngresoResponse save(IngresoRequest request);
+    IngresoResponse saveByUsuario(IngresoRequest request, Usuario usuario);
+    IngresoResponse updateMyIngreso(Long id, IngresoRequest request, Usuario usuario);
     IngresoResponse update(Long id, IngresoRequest request);
     void deleteById(Long id);
+    void deleteMyIngreso(Long id, Usuario usuario);
+    List<IngresoResponse> findByClienteId(Long clienteId);
+    List<IngresoResponse> findByClienteIdAndFechaBetween(Long clienteId, LocalDate startDate, LocalDate endDate);
+    List<IngresoResponse> findByUsuarioId(Long usuarioId);
 }
