@@ -6,6 +6,7 @@ import com.asesoria.contable.app_ac.model.entity.Cliente;
 import com.asesoria.contable.app_ac.model.entity.Usuario;
 import com.asesoria.contable.app_ac.service.ClienteService;
 import com.asesoria.contable.app_ac.service.IngresoService;
+import com.asesoria.contable.app_ac.utils.enums.Regimen;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -103,9 +104,10 @@ public class IngresoController {
     @GetMapping("/mis-ingresos/metricas")
     public Map<String, Object> obtenerMetricasIngresos(@AuthenticationPrincipal Usuario usuario) {
         Cliente cliente = clienteService.findEntityByUsuarioId(usuario.getId());
+        System.out.println(cliente.toString());
 
         // Solo proceder si el cliente es NRUS
-        if (!"NRUS".equals(cliente.getRegimen())) {
+        if (cliente.getRegimen() != Regimen.NRUS) {
             throw new AccessDeniedException("Endpoint solo disponible para clientes NRUS");
         }
 
@@ -127,14 +129,6 @@ public class IngresoController {
                     .multiply(new BigDecimal(100));
         }
         metricas.put("variacionPorcentual", variacion);
-
-        // Ingresos por categoría (ejemplo)
-        Map<String, BigDecimal> ingresosPorCategoria = ingresoService.obtenerIngresosPorCategoria(cliente.getId());
-        metricas.put("ingresosPorCategoria", ingresosPorCategoria);
-
-        // Ingresos pendientes
-        BigDecimal ingresosPendientes = ingresoService.calcularIngresosPendientes(cliente.getId());
-        metricas.put("ingresosPendientes", ingresosPendientes);
 
         // Contador de comprobantes
         Long cantidadComprobantes = ingresoService.contarComprobantesMesActual(cliente.getId());

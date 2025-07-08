@@ -29,7 +29,5 @@ public interface IngresoService {
 
     Map<String, BigDecimal> obtenerIngresosPorCategoria(Long clienteId);
 
-    BigDecimal calcularIngresosPendientes(Long clienteId);
-
     Long contarComprobantesMesActual(Long clienteId);
 }

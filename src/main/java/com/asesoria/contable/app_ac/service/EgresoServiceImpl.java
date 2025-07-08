@@ -11,13 +11,18 @@ import com.asesoria.contable.app_ac.model.entity.Usuario;
 import com.asesoria.contable.app_ac.repository.ClienteRepository;
 import com.asesoria.contable.app_ac.repository.EgresoRepository;
 import com.asesoria.contable.app_ac.utils.enums.Regimen;
+import com.asesoria.contable.app_ac.utils.enums.TipoContabilidad;
 import com.asesoria.contable.app_ac.utils.enums.TipoTributario;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -177,5 +182,43 @@ public class EgresoServiceImpl implements EgresoService {
                 .stream()
                 .map(egresoMapper::toEgresoResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public BigDecimal calcularTotalMesActual(Long clienteId) {
+        YearMonth mesActual = YearMonth.now();
+        LocalDate inicioMes = mesActual.atDay(1);
+        LocalDate finMes = mesActual.atEndOfMonth();
+        return egresoRepository.sumMontoByClienteIdAndFechaBetween(clienteId, inicioMes, finMes);
+    }
+
+    @Override
+    public Map<String, BigDecimal> obtenerEgresosPorTipoContabilidad(Long clienteId) {
+        List<Object[]> resultados = egresoRepository.sumRawByTipoContabilidad(clienteId);
+
+        return resultados.stream()
+                .collect(Collectors.toMap(
+                        row -> ((TipoContabilidad) row[0]).name(),   // convertimos enum a String
+                        row -> (BigDecimal) row[1]
+                ));
+    }
+
+    @Override
+    public Map<String, BigDecimal> obtenerEgresosPorTipoTributario(Long clienteId) {
+        List<Object[]> resultados = egresoRepository.sumRawByTipoTributario(clienteId);
+        Map<String, BigDecimal> resultadoMap = new HashMap<>();
+
+        for (Object[] fila : resultados) {
+            TipoTributario tipo = (TipoTributario) fila[0];
+            BigDecimal total = (BigDecimal) fila[1];
+            resultadoMap.put(tipo.name(), total);
+        }
+
+        return resultadoMap;
+    }
+
+    @Override
+    public List<Map<String, Object>> identificarEgresosRecurrentes(Long clienteId) {
+        return egresoRepository.findEgresosRecurrentes(clienteId);
     }
 }

@@ -2,11 +2,11 @@ package com.asesoria.contable.app_ac.service;
 
 import com.asesoria.contable.app_ac.model.dto.EgresoRequest;
 import com.asesoria.contable.app_ac.model.dto.EgresoResponse;
-import com.asesoria.contable.app_ac.model.dto.IngresoRequest;
-import com.asesoria.contable.app_ac.model.dto.IngresoResponse;
 import com.asesoria.contable.app_ac.model.entity.Usuario;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 public interface EgresoService {
 
@@ -22,4 +22,10 @@ public interface EgresoService {
     EgresoResponse updateMyEgreso(Long id, EgresoRequest request, Usuario usuario);
     void deleteMyEgreso(Long id, Usuario usuario);
     List<EgresoResponse> findByUsuarioId(Long usuarioId);
+
+    // PARA MÉTRICAS
+    BigDecimal calcularTotalMesActual(Long clienteId);
+    Map<String, BigDecimal> obtenerEgresosPorTipoContabilidad(Long clienteId);
+    Map<String, BigDecimal> obtenerEgresosPorTipoTributario(Long clienteId);
+    List<Map<String, Object>> identificarEgresosRecurrentes(Long clienteId);
 }

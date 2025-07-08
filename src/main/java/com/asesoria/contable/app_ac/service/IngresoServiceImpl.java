@@ -209,11 +209,6 @@ public class IngresoServiceImpl implements IngresoService {
     }
 
     @Override
-    public BigDecimal calcularIngresosPendientes(Long clienteId) {
-        return ingresoRepository.sumMontoByClienteIdAndEstadoPagoPendiente(clienteId);
-    }
-
-    @Override
     public Long contarComprobantesMesActual(Long clienteId) {
         YearMonth mesActual = YearMonth.now();
         LocalDate inicioMes = mesActual.atDay(1);
