@@ -24,10 +24,9 @@ public interface IngresoService {
     List<IngresoResponse> findByUsuarioId(Long usuarioId);
 
     BigDecimal calcularTotalMesActual(Long clienteId);
-
     BigDecimal calcularTotalMesAnterior(Long clienteId);
-
     Map<String, BigDecimal> obtenerIngresosPorCategoria(Long clienteId);
-
     Long contarComprobantesMesActual(Long clienteId);
+    Map<String, BigDecimal> obtenerIngresosPorTipoTributario(Long clienteId);
+    List<Map<String, Object>> identificarIngresosRecurrentes(Long clienteId);
 }

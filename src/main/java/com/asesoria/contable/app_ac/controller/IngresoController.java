@@ -5,6 +5,7 @@ import com.asesoria.contable.app_ac.model.dto.IngresoResponse;
 import com.asesoria.contable.app_ac.model.entity.Cliente;
 import com.asesoria.contable.app_ac.model.entity.Usuario;
 import com.asesoria.contable.app_ac.service.ClienteService;
+import com.asesoria.contable.app_ac.service.EgresoService;
 import com.asesoria.contable.app_ac.service.IngresoService;
 import com.asesoria.contable.app_ac.utils.enums.Regimen;
 import jakarta.validation.Valid;
@@ -31,6 +32,7 @@ public class IngresoController {
 
     private final IngresoService ingresoService;
     private final ClienteService clienteService;
+    private final EgresoService egresoService;
 
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     @GetMapping("/{id}")
@@ -133,6 +135,38 @@ public class IngresoController {
         // Contador de comprobantes
         Long cantidadComprobantes = ingresoService.contarComprobantesMesActual(cliente.getId());
         metricas.put("cantidadComprobantes", cantidadComprobantes);
+
+        return metricas;
+    }
+
+    @PreAuthorize("hasRole('CLIENTE')")
+    @GetMapping("/mis-ingresos/metricas-avanzadas")
+    public Map<String, Object> obtenerMetricasIngresosNoNrus(@AuthenticationPrincipal Usuario usuario) {
+        Cliente cliente = clienteService.findEntityByUsuarioId(usuario.getId());
+
+        // Solo permitir si el cliente NO es NRUS
+        if (cliente.getRegimen() == Regimen.NRUS) {
+            throw new AccessDeniedException("Endpoint no disponible para clientes NRUS");
+        }
+
+        Map<String, Object> metricas = new HashMap<>();
+
+        // Total ingresos del mes actual
+        BigDecimal totalMesActual = ingresoService.calcularTotalMesActual(cliente.getId());
+        metricas.put("totalMesActual", totalMesActual);
+
+        // Desglose por tipo tributario
+        Map<String, BigDecimal> ingresosPorTipoTributario = ingresoService.obtenerIngresosPorTipoTributario(cliente.getId());
+        metricas.put("ingresosPorTipoTributario", ingresosPorTipoTributario);
+
+        // Ingresos recurrentes
+        List<Map<String, Object>> ingresosRecurrentes = ingresoService.identificarIngresosRecurrentes(cliente.getId());
+        metricas.put("ingresosRecurrentes", ingresosRecurrentes);
+
+        // Total egresos (para balance)
+        BigDecimal totalEgresosMesActual = egresoService.calcularTotalMesActual(cliente.getId());
+        BigDecimal balanceMensual = totalMesActual.subtract(totalEgresosMesActual);
+        metricas.put("balanceMensual", balanceMensual);
 
         return metricas;
     }

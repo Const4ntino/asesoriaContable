@@ -215,5 +215,19 @@ public class IngresoServiceImpl implements IngresoService {
         LocalDate finMes = mesActual.atEndOfMonth();
         return ingresoRepository.countByClienteIdAndFechaBetween(clienteId, inicioMes, finMes);
     }
+
+    @Override
+    public Map<String, BigDecimal> obtenerIngresosPorTipoTributario(Long clienteId) {
+        return ingresoRepository.sumRawByTipoTributario(clienteId).stream()
+                .collect(Collectors.toMap(
+                        r -> ((TipoTributario) r[0]).name(),
+                        r -> (BigDecimal) r[1]
+                ));
+    }
+
+    @Override
+    public List<Map<String, Object>> identificarIngresosRecurrentes(Long clienteId) {
+        return ingresoRepository.findIngresosRecurrentes(clienteId);
+    }
 }
 
