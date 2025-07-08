@@ -56,6 +56,7 @@ CREATE TABLE egreso (
     id_egreso BIGSERIAL PRIMARY KEY,
     id_cliente BIGINT NOT NULL REFERENCES cliente(id_cliente) ON DELETE CASCADE,
     monto DECIMAL(12, 2) NOT NULL,
+    monto_igv DECIMAL(12, 2) NOT NULL,
     fecha DATE NOT NULL,
     descripcion TEXT,
     nro_comprobante VARCHAR(50),

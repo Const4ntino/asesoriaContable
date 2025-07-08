@@ -12,10 +12,10 @@ public interface IngresoService {
     IngresoResponse findById(Long id);
     List<IngresoResponse> findAll();
     IngresoResponse save(IngresoRequest request);
-    IngresoResponse saveByUsuario(IngresoRequest request, Usuario usuario);
-    IngresoResponse updateMyIngreso(Long id, IngresoRequest request, Usuario usuario);
     IngresoResponse update(Long id, IngresoRequest request);
     void deleteById(Long id);
+    IngresoResponse saveByUsuario(IngresoRequest request, Usuario usuario);
+    IngresoResponse updateMyIngreso(Long id, IngresoRequest request, Usuario usuario);
     void deleteMyIngreso(Long id, Usuario usuario);
     List<IngresoResponse> findByClienteId(Long clienteId);
     List<IngresoResponse> findByClienteIdAndFechaBetween(Long clienteId, LocalDate startDate, LocalDate endDate);

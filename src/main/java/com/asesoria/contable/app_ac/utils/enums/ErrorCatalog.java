@@ -16,6 +16,8 @@ public enum ErrorCatalog {
 
     INGRESO_NOT_FOUND("ERROR_INGRESO_01", "Ingreso no encontrado"),
 
+    EGRESO_NOT_FOUND("ERROR_EGRESO_01", "Egreso no encontrado"),
+
     ERROR_GENERICO("ERROR_GENERICO", "Un error inesperado a ocurrido");
 
     private final String codigo;

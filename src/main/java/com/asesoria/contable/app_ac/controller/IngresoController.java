@@ -23,30 +23,35 @@ public class IngresoController {
 
     private final IngresoService ingresoService;
 
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @GetMapping("/{id}")
     public ResponseEntity<IngresoResponse> findById(@PathVariable Long id) {
         IngresoResponse ingreso = ingresoService.findById(id);
         return ResponseEntity.ok(ingreso);
     }
 
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @GetMapping
     public ResponseEntity<List<IngresoResponse>> findAll() {
         List<IngresoResponse> ingresos = ingresoService.findAll();
         return ResponseEntity.ok(ingresos);
     }
 
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PostMapping
     public ResponseEntity<IngresoResponse> save(@Valid @RequestBody IngresoRequest request) {
         IngresoResponse newIngreso = ingresoService.save(request);
         return new ResponseEntity<>(newIngreso, HttpStatus.CREATED);
     }
 
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PutMapping("/{id}")
     public ResponseEntity<IngresoResponse> update(@PathVariable Long id, @Valid @RequestBody IngresoRequest request) {
         IngresoResponse updatedIngreso = ingresoService.update(id, request);
         return ResponseEntity.ok(updatedIngreso);
     }
 
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         ingresoService.deleteById(id);
@@ -79,18 +84,18 @@ public class IngresoController {
     }
 
     // Filtrar ingresos por cliente
-    @PreAuthorize("hasRole('ADMINISTRADOR')")
-    @GetMapping("/cliente/{clienteId}")
-    public ResponseEntity<List<IngresoResponse>> getIngresosByClienteId(@PathVariable Long clienteId) {
-        List<IngresoResponse> ingresos = ingresoService.findByClienteId(clienteId);
-        return ResponseEntity.ok(ingresos);
-    }
-
-    // Filtrar ingresos por cliente
     @PreAuthorize("hasRole('CLIENTE')")
     @GetMapping("/mis-ingresos")
     public ResponseEntity<List<IngresoResponse>> getMyIngresos(@AuthenticationPrincipal Usuario usuario) {
         List<IngresoResponse> ingresos = ingresoService.findByUsuarioId(usuario.getId());
+        return ResponseEntity.ok(ingresos);
+    }
+
+    // Filtrar ingresos por cliente
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @GetMapping("/cliente/{clienteId}")
+    public ResponseEntity<List<IngresoResponse>> getIngresosByClienteId(@PathVariable Long clienteId) {
+        List<IngresoResponse> ingresos = ingresoService.findByClienteId(clienteId);
         return ResponseEntity.ok(ingresos);
     }
 
