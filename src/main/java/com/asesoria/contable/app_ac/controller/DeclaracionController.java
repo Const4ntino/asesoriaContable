@@ -2,6 +2,7 @@ package com.asesoria.contable.app_ac.controller;
 
 import com.asesoria.contable.app_ac.model.dto.DeclaracionRequest;
 import com.asesoria.contable.app_ac.model.dto.DeclaracionResponse;
+import com.asesoria.contable.app_ac.model.dto.PeriodoVencimientoResponse;
 import com.asesoria.contable.app_ac.model.entity.Usuario;
 import com.asesoria.contable.app_ac.service.DeclaracionService;
 import jakarta.validation.Valid;
@@ -98,5 +99,19 @@ public class DeclaracionController {
             @AuthenticationPrincipal Usuario usuario) {
         DeclaracionResponse declaracionActualizada = declaracionService.notificarContador(id, usuario);
         return ResponseEntity.ok(declaracionActualizada);
+    }
+
+    @PreAuthorize("hasRole('CLIENTE')")
+    @GetMapping("/mis-declaraciones/primera-creada")
+    public ResponseEntity<DeclaracionResponse> getPrimeraDeclaracionCreada(@AuthenticationPrincipal Usuario usuario) {
+        DeclaracionResponse declaracion = declaracionService.findFirstCreadaByUsuario(usuario);
+        return ResponseEntity.ok(declaracion);
+    }
+
+    @PreAuthorize("hasRole('CLIENTE')")
+    @GetMapping("/mis-declaraciones/vencimiento-actual")
+    public ResponseEntity<PeriodoVencimientoResponse> getPeriodoActualYFechaVencimiento(@AuthenticationPrincipal Usuario usuario) {
+        PeriodoVencimientoResponse response = declaracionService.getPeriodoActualYFechaVencimiento(usuario);
+        return ResponseEntity.ok(response);
     }
 }

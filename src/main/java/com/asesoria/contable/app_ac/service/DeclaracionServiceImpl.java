@@ -5,6 +5,7 @@ import com.asesoria.contable.app_ac.exceptions.DeclaracionNotFoundException;
 import com.asesoria.contable.app_ac.mapper.DeclaracionMapper;
 import com.asesoria.contable.app_ac.model.dto.DeclaracionRequest;
 import com.asesoria.contable.app_ac.model.dto.DeclaracionResponse;
+import com.asesoria.contable.app_ac.model.dto.PeriodoVencimientoResponse;
 import com.asesoria.contable.app_ac.model.entity.Cliente;
 import com.asesoria.contable.app_ac.model.entity.Declaracion;
 import com.asesoria.contable.app_ac.model.entity.Usuario;
@@ -120,7 +121,7 @@ public class DeclaracionServiceImpl implements DeclaracionService {
         Declaracion nuevaDeclaracion = new Declaracion();
         nuevaDeclaracion.setCliente(cliente);
         nuevaDeclaracion.setPeriodoTributario(periodoTributario);
-        nuevaDeclaracion.setTipo("Por defecto");
+        nuevaDeclaracion.setTipo("IGV");
         nuevaDeclaracion.setFechaLimite(fechaLimite);
         nuevaDeclaracion.setEstadoCliente(EstadoCliente.PENDIENTE);
         nuevaDeclaracion.setEstadoContador(EstadoContador.PENDIENTE);
@@ -172,5 +173,26 @@ public class DeclaracionServiceImpl implements DeclaracionService {
 
         Declaracion declaracionActualizada = declaracionRepository.save(declaracion);
         return declaracionMapper.toDeclaracionResponse(declaracionActualizada);
+    }
+
+    @Override
+    public DeclaracionResponse findFirstCreadaByUsuario(Usuario usuario) {
+        Cliente cliente = clienteService.findEntityByUsuarioId(usuario.getId());
+
+        return declaracionRepository.findFirstByClienteIdAndEstadoOrderByPeriodoTributarioAsc(cliente.getId(), DeclaracionEstado.CREADO)
+                .map(declaracionMapper::toDeclaracionResponse)
+                .orElseThrow(() -> new DeclaracionNotFoundException());
+    }
+
+    @Override
+    public PeriodoVencimientoResponse getPeriodoActualYFechaVencimiento(Usuario usuario) {
+        Cliente cliente = clienteService.findEntityByUsuarioId(usuario.getId());
+        String ruc = cliente.getRucDni();
+
+        YearMonth periodoActual = YearMonth.now();
+        int ultimoDigito = Character.getNumericValue(ruc.charAt(ruc.length() - 1));
+        LocalDate fechaLimite = CronogramaVencimientoSunat.getFechaVencimiento(periodoActual.toString(), ultimoDigito);
+
+        return new PeriodoVencimientoResponse(periodoActual, fechaLimite);
     }
 }

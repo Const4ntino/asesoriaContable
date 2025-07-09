@@ -12,8 +12,8 @@ import java.util.Optional;
 public interface DeclaracionRepository extends JpaRepository<Declaracion, Long>, JpaSpecificationExecutor<Declaracion> {
     List<Declaracion> findByClienteId(Long clienteId);
 
-    boolean existsByClienteIdAndPeriodoTributarioAndTipo(Long clienteId, LocalDate periodoTributario, String tipo);
-
     Optional<Declaracion> findByClienteIdAndPeriodoTributarioAndEstado(Long clienteId, LocalDate periodoTributario, DeclaracionEstado estado);
+
+    Optional<Declaracion> findFirstByClienteIdAndEstadoOrderByPeriodoTributarioAsc(Long clienteId, DeclaracionEstado estado);
 }
 

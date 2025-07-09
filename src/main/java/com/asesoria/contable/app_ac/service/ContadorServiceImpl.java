@@ -2,6 +2,7 @@ package com.asesoria.contable.app_ac.service;
 
 import com.asesoria.contable.app_ac.exceptions.ContadorNotFoundException;
 import com.asesoria.contable.app_ac.exceptions.UsuarioNotFoundException;
+import com.asesoria.contable.app_ac.mapper.ClienteMapper;
 import com.asesoria.contable.app_ac.mapper.ContadorMapper;
 import com.asesoria.contable.app_ac.model.dto.ClienteConMetricasResponse;
 import com.asesoria.contable.app_ac.model.dto.ContadorRequest;
@@ -37,6 +38,7 @@ public class ContadorServiceImpl implements ContadorService {
     private final UsuarioRepository usuarioRepository;
     private final ContadorRepository contadorRepository;
     private final ClienteRepository clienteRepository;
+    private final ClienteMapper clienteMapper;
     private final ContadorMapper contadorMapper;
     private final IngresoRepository ingresoRepository;
     private final EgresoRepository egresoRepository;
@@ -183,11 +185,12 @@ public class ContadorServiceImpl implements ContadorService {
             BigDecimal utilidad = totalIngresos.subtract(totalEgresos);
 
             ClienteConMetricasResponse response = new ClienteConMetricasResponse();
-            response.setId(cliente.getId());
-            response.setNombres(cliente.getNombres());
-            response.setApellidos(cliente.getApellidos());
-            response.setRucDni(cliente.getRucDni());
-            response.setRegimen(cliente.getRegimen().toString());
+//            response.setId(cliente.getId());
+//            response.setNombres(cliente.getNombres());
+//            response.setApellidos(cliente.getApellidos());
+//            response.setRucDni(cliente.getRucDni());
+//            response.setRegimen(cliente.getRegimen().toString());
+            response.setCliente(clienteMapper.toClienteResponse(cliente));
             response.setTotalIngresosMesActual(totalIngresos);
             response.setTotalEgresosMesActual(totalEgresos);
             response.setUtilidadMesActual(utilidad);

@@ -2,6 +2,7 @@ package com.asesoria.contable.app_ac.service;
 
 import com.asesoria.contable.app_ac.model.dto.DeclaracionRequest;
 import com.asesoria.contable.app_ac.model.dto.DeclaracionResponse;
+import com.asesoria.contable.app_ac.model.dto.PeriodoVencimientoResponse;
 import com.asesoria.contable.app_ac.model.entity.Usuario;
 import com.asesoria.contable.app_ac.utils.enums.DeclaracionEstado;
 import com.asesoria.contable.app_ac.utils.enums.EstadoContador;
@@ -23,4 +24,8 @@ public interface DeclaracionService {
     List<DeclaracionResponse> buscarMisDeclaraciones(Usuario usuario, LocalDate fechaInicio, LocalDate fechaFin, DeclaracionEstado estado, EstadoContador estadoContador);
 
     DeclaracionResponse notificarContador(Long declaracionId, Usuario usuario);
+
+    DeclaracionResponse findFirstCreadaByUsuario(Usuario usuario);
+
+    PeriodoVencimientoResponse getPeriodoActualYFechaVencimiento(Usuario usuario);
 }

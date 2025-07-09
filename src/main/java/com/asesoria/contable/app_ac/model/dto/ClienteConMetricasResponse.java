@@ -6,11 +6,12 @@ import java.math.BigDecimal;
 @Data
 public class ClienteConMetricasResponse {
     // Datos del Cliente
-    private Long id;
-    private String nombres;
-    private String apellidos;
-    private String rucDni;
-    private String regimen;
+//    private Long id;
+//    private String nombres;
+//    private String apellidos;
+//    private String rucDni;
+//    private String regimen;
+    private ClienteResponse cliente;
 
     // Métricas del Mes Actual
     private BigDecimal totalIngresosMesActual;
