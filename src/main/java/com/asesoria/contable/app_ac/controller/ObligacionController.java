@@ -1,5 +1,6 @@
 package com.asesoria.contable.app_ac.controller;
 
+import com.asesoria.contable.app_ac.model.dto.DeclaracionRequest;
 import com.asesoria.contable.app_ac.model.dto.ObligacionRequest;
 import com.asesoria.contable.app_ac.model.dto.ObligacionResponse;
 import com.asesoria.contable.app_ac.service.ObligacionService;
@@ -8,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import com.asesoria.contable.app_ac.model.entity.Usuario;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -41,6 +44,13 @@ public class ObligacionController {
     }
 
     @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @PostMapping("/from-declaracion")
+    public ResponseEntity<ObligacionResponse> saveFromDeclaracion(@Valid @RequestBody DeclaracionRequest request) {
+        ObligacionResponse newObligacion = obligacionService.saveFromDeclaracion(request);
+        return new ResponseEntity<>(newObligacion, HttpStatus.CREATED);
+    }
+
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PutMapping("/{id}")
     public ResponseEntity<ObligacionResponse> update(@PathVariable Long id, @Valid @RequestBody ObligacionRequest request) {
         ObligacionResponse updatedObligacion = obligacionService.update(id, request);
@@ -58,6 +68,13 @@ public class ObligacionController {
     @GetMapping("/cliente/{clienteId}")
     public ResponseEntity<List<ObligacionResponse>> getObligacionesByClienteId(@PathVariable Long clienteId) {
         List<ObligacionResponse> obligaciones = obligacionService.findByClienteId(clienteId);
+        return ResponseEntity.ok(obligaciones);
+    }
+
+    @PreAuthorize("hasRole('CONTADOR')")
+    @GetMapping("/mis-clientes/ultimas-obligaciones")
+    public ResponseEntity<List<ObligacionResponse>> getLatestObligacionesForMyClients(@AuthenticationPrincipal Usuario usuario) {
+        List<ObligacionResponse> obligaciones = obligacionService.getLatestObligacionesForMyClients(usuario);
         return ResponseEntity.ok(obligaciones);
     }
 }

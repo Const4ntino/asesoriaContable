@@ -4,17 +4,19 @@ import com.asesoria.contable.app_ac.exceptions.ClienteNotFoundException;
 import com.asesoria.contable.app_ac.exceptions.DeclaracionNotFoundException;
 import com.asesoria.contable.app_ac.exceptions.ObligacionNotFoundException;
 import com.asesoria.contable.app_ac.mapper.ObligacionMapper;
+import com.asesoria.contable.app_ac.model.dto.DeclaracionRequest;
 import com.asesoria.contable.app_ac.model.dto.ObligacionRequest;
 import com.asesoria.contable.app_ac.model.dto.ObligacionResponse;
-import com.asesoria.contable.app_ac.model.entity.Cliente;
-import com.asesoria.contable.app_ac.model.entity.Declaracion;
-import com.asesoria.contable.app_ac.model.entity.Obligacion;
+import com.asesoria.contable.app_ac.model.entity.*;
 import com.asesoria.contable.app_ac.repository.ClienteRepository;
 import com.asesoria.contable.app_ac.repository.DeclaracionRepository;
+import com.asesoria.contable.app_ac.repository.ContadorRepository;
 import com.asesoria.contable.app_ac.repository.ObligacionRepository;
+import com.asesoria.contable.app_ac.utils.enums.EstadoObligacion;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,6 +28,7 @@ public class ObligacionServiceImpl implements ObligacionService {
     private final ObligacionMapper obligacionMapper;
     private final ClienteRepository clienteRepository;
     private final DeclaracionRepository declaracionRepository;
+    private final ContadorRepository contadorRepository;
 
     @Override
     public List<ObligacionResponse> findAll() {
@@ -97,4 +100,42 @@ public class ObligacionServiceImpl implements ObligacionService {
                 .map(obligacionMapper::convertToResponse)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public List<ObligacionResponse> getLatestObligacionesForMyClients(Usuario usuario) {
+        Contador contador = contadorRepository.findByUsuarioId(usuario.getId())
+                .orElseThrow(() -> new RuntimeException("Contador no encontrado para el usuario."));
+
+        List<Cliente> clientes = clienteRepository.findAllByContadorId(contador.getId());
+        List<Long> clienteIds = clientes.stream()
+                .map(Cliente::getId)
+                .collect(Collectors.toList());
+
+        if (clienteIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<Obligacion> latestObligaciones = obligacionRepository.findLatestObligacionesForClients(clienteIds);
+
+        return latestObligaciones.stream()
+                .map(obligacionMapper::convertToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public ObligacionResponse saveFromDeclaracion(DeclaracionRequest declaracionRequest) {
+        Cliente cliente = clienteRepository.findById(declaracionRequest.getIdCliente())
+                .orElseThrow(ClienteNotFoundException::new);
+
+        Obligacion obligacion = new Obligacion();
+        obligacion.setCliente(cliente);
+        obligacion.setTipo(declaracionRequest.getTipo());
+        obligacion.setPeriodo(declaracionRequest.getPeriodoTributario());
+        obligacion.setMonto(declaracionRequest.getTotalPagarDeclaracion());
+        obligacion.setFechaLimite(declaracionRequest.getFechaLimite());
+        obligacion.setEstado(EstadoObligacion.PENDIENTE);
+
+        return obligacionMapper.convertToResponse(obligacionRepository.save(obligacion));
+    }
 }
+
