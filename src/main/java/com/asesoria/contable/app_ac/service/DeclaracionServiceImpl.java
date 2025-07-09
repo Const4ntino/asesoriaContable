@@ -232,4 +232,117 @@ public class DeclaracionServiceImpl implements DeclaracionService {
                 .map(declaracionMapper::toDeclaracionResponse)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public List<DeclaracionResponse> searchLatestDeclarationsForMyClients(
+            Usuario usuario,
+            String nombresCliente,
+            String regimenCliente,
+            String rucDniCliente,
+            Integer periodoTributarioMes,
+            java.math.BigDecimal totalPagarDeclaracion,
+            DeclaracionEstado estado) {
+
+        Contador contador = contadorRepository.findByUsuarioId(usuario.getId())
+                .orElseThrow(() -> new RuntimeException("Contador no encontrado para el usuario."));
+
+        List<Cliente> clientesDelContador = clienteRepository.findAllByContadorId(contador.getId());
+        List<Long> clienteIdsDelContador = clientesDelContador.stream()
+                .map(Cliente::getId)
+                .collect(Collectors.toList());
+
+        if (clienteIdsDelContador.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        Specification<Declaracion> spec = (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            // Filter by clients associated with the accountant
+            predicates.add(root.get("cliente").get("id").in(clienteIdsDelContador));
+
+            // Apply optional filters
+            if (nombresCliente != null && !nombresCliente.isEmpty()) {
+                predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("cliente").get("nombres")), "%" + nombresCliente.toLowerCase() + "%"));
+            }
+            if (regimenCliente != null && !regimenCliente.isEmpty()) {
+                predicates.add(criteriaBuilder.equal(root.get("cliente").get("regimen"), regimenCliente));
+            }
+            if (rucDniCliente != null && !rucDniCliente.isEmpty()) {
+                predicates.add(criteriaBuilder.like(root.get("cliente").get("rucDni"), "%" + rucDniCliente + "%"));
+            }
+            if (periodoTributarioMes != null) {
+                // Assuming periodoTributario is stored as LocalDate, we extract month and year
+                // For year 2025, we need to ensure the year is also considered.
+                // This might require a function in the database or a more complex predicate.
+                // For simplicity, let's assume we are filtering for the month in any year for now,
+                // or we can add a year parameter if needed.
+                // Given the request specifies "mes del año 2025", we should filter by year as well.
+                predicates.add(criteriaBuilder.equal(criteriaBuilder.function("MONTH", Integer.class, root.get("periodoTributario")), periodoTributarioMes));
+                predicates.add(criteriaBuilder.equal(criteriaBuilder.function("YEAR", Integer.class, root.get("periodoTributario")), 2025));
+            }
+            if (totalPagarDeclaracion != null) {
+                predicates.add(criteriaBuilder.equal(root.get("totalPagarDeclaracion"), totalPagarDeclaracion));
+            }
+            if (estado != null) {
+                predicates.add(criteriaBuilder.equal(root.get("estado"), estado));
+            }
+
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+
+        // Get all declarations for the accountant's clients that match the filters
+        List<Declaracion> filteredDeclarations = declaracionRepository.findAll(spec);
+
+        // Now, from these filtered declarations, we need to get the latest for each client.
+        // This logic is similar to findLatestDeclarationsForClients but applied to the filtered set.
+        // A more efficient way might be to integrate this into the Specification if possible,
+        // or to perform a post-processing step.
+        // For now, let's re-use the existing findLatestDeclarationsForClients logic
+        // by filtering the clientIds first based on the search criteria.
+
+        // This approach might not be the most efficient if the initial filteredDeclarations list is very large.
+        // A better approach would be to modify findLatestDeclarationsForClients to accept a Specification,
+        // or to build a more complex query directly in the repository.
+
+        // For simplicity and re-using existing logic, let's filter the clientIds based on the search criteria
+        // and then call findLatestDeclarationsForClients.
+        // This means the "latest" will be among the *filtered* clients, not necessarily the latest overall
+        // if a client has multiple declarations matching the filter.
+
+        // Let's refine this. The request is "ultimas-declaraciones/filtrar", implying we first get the latest
+        // for each client, and *then* apply the filters to *those* latest declarations.
+
+        List<Declaracion> latestDeclarations = declaracionRepository.findLatestDeclarationsForClients(clienteIdsDelContador);
+
+        // Now filter these latest declarations based on the provided criteria
+        List<Declaracion> result = latestDeclarations.stream()
+                .filter(declaracion -> {
+                    boolean matches = true;
+                    if (nombresCliente != null && !nombresCliente.isEmpty()) {
+                        matches = matches && declaracion.getCliente().getNombres().toLowerCase().contains(nombresCliente.toLowerCase());
+                    }
+                    if (regimenCliente != null && !regimenCliente.isEmpty()) {
+                        matches = matches && declaracion.getCliente().getRegimen().name().equals(regimenCliente);
+                    }
+                    if (rucDniCliente != null && !rucDniCliente.isEmpty()) {
+                        matches = matches && declaracion.getCliente().getRucDni().contains(rucDniCliente);
+                    }
+                    if (periodoTributarioMes != null) {
+                        matches = matches && declaracion.getPeriodoTributario().getMonthValue() == periodoTributarioMes && declaracion.getPeriodoTributario().getYear() == 2025;
+                    }
+                    if (totalPagarDeclaracion != null) {
+                        matches = matches && declaracion.getTotalPagarDeclaracion().compareTo(totalPagarDeclaracion) == 0;
+                    }
+                    if (estado != null) {
+                        matches = matches && declaracion.getEstado().equals(estado);
+                    }
+                    return matches;
+                })
+                .collect(Collectors.toList());
+
+        return result.stream()
+                .map(declaracionMapper::toDeclaracionResponse)
+                .collect(Collectors.toList());
+    }
 }

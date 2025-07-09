@@ -19,6 +19,7 @@ import com.asesoria.contable.app_ac.utils.enums.DeclaracionEstado;
 import com.asesoria.contable.app_ac.utils.enums.EstadoContador;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @RestController
@@ -122,7 +123,27 @@ public class DeclaracionController {
         return ResponseEntity.ok(declaraciones);
     }
 
+    @PreAuthorize("hasRole('CONTADOR')")
+    @GetMapping("/mis-clientes/ultimas-declaraciones/filtrar")
+    public ResponseEntity<List<DeclaracionResponse>> searchLatestDeclarationsForMyClients(
+            @AuthenticationPrincipal Usuario usuario,
+            @RequestParam(required = false) String nombresCliente,
+            @RequestParam(required = false) String regimenCliente,
+            @RequestParam(required = false) String rucDniCliente,
+            @RequestParam(required = false) Integer periodoTributarioMes,
+            @RequestParam(required = false) BigDecimal totalPagarDeclaracion,
+            @RequestParam(required = false) DeclaracionEstado estado) {
 
+        List<DeclaracionResponse> declaraciones = declaracionService.searchLatestDeclarationsForMyClients(
+                usuario,
+                nombresCliente,
+                regimenCliente,
+                rucDniCliente,
+                periodoTributarioMes,
+                totalPagarDeclaracion,
+                estado);
+        return ResponseEntity.ok(declaraciones);
+    }
 
-
+    
 }

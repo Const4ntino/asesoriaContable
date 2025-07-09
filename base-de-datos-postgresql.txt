@@ -85,6 +85,7 @@ CREATE TABLE declaracion (
     igv_compras DECIMAL(10, 2),
     ir_estimado DECIMAL(10, 2),
     total_pagar_declaracion DECIMAL(12, 2),
+    estado VARCHAR(20) DEFAULT 'CREADO' CHECK (estado IN ('CREADO', 'CONTADOR_NOTIFICADO', 'EN_PROCESO', 'DECLARADO', 'LISTO')),
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(id_cliente, periodo_tributario, tipo)
