@@ -211,4 +211,25 @@ public class DeclaracionServiceImpl implements DeclaracionService {
 
         return new PeriodoVencimientoResponse(periodoActual, fechaLimite);
     }
+
+    @Override
+    public List<DeclaracionResponse> getLatestDeclarationsForMyClients(Usuario usuario) {
+        Contador contador = contadorRepository.findByUsuarioId(usuario.getId())
+                .orElseThrow(() -> new RuntimeException("Contador no encontrado para el usuario."));
+
+        List<Cliente> clientes = clienteRepository.findAllByContadorId(contador.getId());
+        List<Long> clienteIds = clientes.stream()
+                .map(Cliente::getId)
+                .collect(Collectors.toList());
+
+        if (clienteIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<Declaracion> latestDeclarations = declaracionRepository.findLatestDeclarationsForClients(clienteIds);
+
+        return latestDeclarations.stream()
+                .map(declaracionMapper::toDeclaracionResponse)
+                .collect(Collectors.toList());
+    }
 }

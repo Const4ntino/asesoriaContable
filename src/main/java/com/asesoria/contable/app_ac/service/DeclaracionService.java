@@ -28,4 +28,6 @@ public interface DeclaracionService {
     DeclaracionResponse findFirstCreadaByUsuario(Usuario usuario);
 
     PeriodoVencimientoResponse getPeriodoActualYFechaVencimiento(Usuario usuario);
+
+    List<DeclaracionResponse> getLatestDeclarationsForMyClients(Usuario usuario);
 }

@@ -12,7 +12,7 @@ import java.time.LocalDate;
 public class DeclaracionResponse {
 
     private Long id;
-    private Long idCliente;
+    private ClienteResponse cliente;
     private LocalDate periodoTributario;
     private String tipo;
     private EstadoCliente estadoCliente;

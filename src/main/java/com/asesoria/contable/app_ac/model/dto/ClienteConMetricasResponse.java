@@ -11,4 +11,7 @@ public class ClienteConMetricasResponse {
     private BigDecimal totalIngresosMesActual;
     private BigDecimal totalEgresosMesActual;
     private BigDecimal utilidadMesActual;
+
+    // Métricas del Mes Anterior
+
 }

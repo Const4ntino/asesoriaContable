@@ -10,7 +10,7 @@ import org.mapstruct.MappingTarget;
 @Mapper(componentModel = "spring")
 public interface DeclaracionMapper {
 
-    @Mapping(source = "cliente.id", target = "idCliente")
+    //@Mapping(source = "cliente.id", target = "idCliente")
     DeclaracionResponse toDeclaracionResponse(Declaracion declaracion);
 
     @Mapping(target = "cliente", ignore = true)

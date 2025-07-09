@@ -114,4 +114,13 @@ public class DeclaracionController {
         PeriodoVencimientoResponse response = declaracionService.getPeriodoActualYFechaVencimiento(usuario);
         return ResponseEntity.ok(response);
     }
+
+    @PreAuthorize("hasRole('CONTADOR')")
+    @GetMapping("/mis-clientes/ultimas-declaraciones")
+    public ResponseEntity<List<DeclaracionResponse>> getLatestDeclarationsForMyClients(@AuthenticationPrincipal Usuario usuario) {
+        List<DeclaracionResponse> declaraciones = declaracionService.getLatestDeclarationsForMyClients(usuario);
+        return ResponseEntity.ok(declaraciones);
+    }
+
+
 }
