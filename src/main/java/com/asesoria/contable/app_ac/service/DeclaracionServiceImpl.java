@@ -7,12 +7,24 @@ import com.asesoria.contable.app_ac.model.dto.DeclaracionRequest;
 import com.asesoria.contable.app_ac.model.dto.DeclaracionResponse;
 import com.asesoria.contable.app_ac.model.entity.Cliente;
 import com.asesoria.contable.app_ac.model.entity.Declaracion;
+import com.asesoria.contable.app_ac.model.entity.Usuario;
 import com.asesoria.contable.app_ac.repository.ClienteRepository;
 import com.asesoria.contable.app_ac.repository.DeclaracionRepository;
+import com.asesoria.contable.app_ac.utils.enums.CronogramaVencimientoSunat;
+import com.asesoria.contable.app_ac.utils.enums.DeclaracionEstado;
+import com.asesoria.contable.app_ac.utils.enums.EstadoCliente;
+import com.asesoria.contable.app_ac.utils.enums.EstadoContador;
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,6 +34,7 @@ public class DeclaracionServiceImpl implements DeclaracionService {
     private final DeclaracionRepository declaracionRepository;
     private final ClienteRepository clienteRepository;
     private final DeclaracionMapper declaracionMapper;
+    private final ClienteService clienteService;
 
     @Override
     public DeclaracionResponse findById(Long id) {
@@ -79,5 +92,79 @@ public class DeclaracionServiceImpl implements DeclaracionService {
                 .stream()
                 .map(declaracionMapper::toDeclaracionResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public DeclaracionResponse generarDeclaracionSiNoExiste(Usuario usuario) {
+        Cliente cliente = clienteService.findEntityByUsuarioId(usuario.getId());
+        String ruc = cliente.getRucDni();
+
+        YearMonth periodo = YearMonth.now().minusMonths(1);
+        LocalDate periodoTributario = periodo.atDay(1);
+
+        Optional<Declaracion> declaracionExistente = declaracionRepository.findByClienteIdAndPeriodoTributarioAndTipo(cliente.getId(), periodoTributario, "CREADO");
+
+        if (declaracionExistente.isPresent()) {
+            return declaracionMapper.toDeclaracionResponse(declaracionExistente.get());
+        }
+
+        int ultimoDigito = Character.getNumericValue(ruc.charAt(ruc.length() - 1));
+        LocalDate fechaLimite = CronogramaVencimientoSunat.getFechaVencimiento(periodo.toString(), ultimoDigito);
+
+        Declaracion nuevaDeclaracion = new Declaracion();
+        nuevaDeclaracion.setCliente(cliente);
+        nuevaDeclaracion.setPeriodoTributario(periodoTributario);
+        nuevaDeclaracion.setTipo("Por defecto");
+        nuevaDeclaracion.setFechaLimite(fechaLimite);
+        nuevaDeclaracion.setEstadoCliente(EstadoCliente.PENDIENTE);
+        nuevaDeclaracion.setEstadoContador(EstadoContador.PENDIENTE);
+        nuevaDeclaracion.setEstado(DeclaracionEstado.CREADO);
+
+        Declaracion declaracionGuardada = declaracionRepository.save(nuevaDeclaracion);
+        return declaracionMapper.toDeclaracionResponse(declaracionGuardada);
+    }
+
+    @Override
+    public List<DeclaracionResponse> buscarMisDeclaraciones(Usuario usuario, LocalDate fechaInicio, LocalDate fechaFin, DeclaracionEstado estado, EstadoContador estadoContador) {
+        Cliente cliente = clienteService.findEntityByUsuarioId(usuario.getId());
+
+        Specification<Declaracion> spec = (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(criteriaBuilder.equal(root.get("cliente"), cliente));
+
+            if (fechaInicio != null) {
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("periodoTributario"), fechaInicio));
+            }
+            if (fechaFin != null) {
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("periodoTributario"), fechaFin));
+            }
+            if (estado != null) {
+                predicates.add(criteriaBuilder.equal(root.get("estado"), estado));
+            }
+            if (estadoContador != null) {
+                predicates.add(criteriaBuilder.equal(root.get("estadoContador"), estadoContador));
+            }
+
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+
+        return declaracionRepository.findAll(spec).stream()
+                .map(declaracionMapper::toDeclaracionResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public DeclaracionResponse notificarContador(Long declaracionId, Usuario usuario) {
+        Declaracion declaracion = declaracionRepository.findById(declaracionId)
+                .orElseThrow(DeclaracionNotFoundException::new);
+
+        if (!declaracion.getCliente().getUsuario().getId().equals(usuario.getId())) {
+            throw new AccessDeniedException("No tiene permiso para notificar sobre esta declaración.");
+        }
+
+        declaracion.setEstado(DeclaracionEstado.CONTADOR_NOTIFICADO);
+
+        Declaracion declaracionActualizada = declaracionRepository.save(declaracion);
+        return declaracionMapper.toDeclaracionResponse(declaracionActualizada);
     }
 }

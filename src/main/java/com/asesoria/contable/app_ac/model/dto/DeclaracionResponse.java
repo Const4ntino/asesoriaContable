@@ -1,5 +1,6 @@
 package com.asesoria.contable.app_ac.model.dto;
 
+import com.asesoria.contable.app_ac.utils.enums.DeclaracionEstado;
 import com.asesoria.contable.app_ac.utils.enums.EstadoCliente;
 import com.asesoria.contable.app_ac.utils.enums.EstadoContador;
 import lombok.Data;
@@ -26,4 +27,5 @@ public class DeclaracionResponse {
     private BigDecimal igvCompras;
     private BigDecimal irEstimado;
     private BigDecimal totalPagarDeclaracion;
+    private DeclaracionEstado estado;
 }

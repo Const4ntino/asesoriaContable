@@ -2,12 +2,8 @@ package com.asesoria.contable.app_ac.controller;
 
 import com.asesoria.contable.app_ac.model.dto.DeclaracionRequest;
 import com.asesoria.contable.app_ac.model.dto.DeclaracionResponse;
-import com.asesoria.contable.app_ac.model.entity.Cliente;
 import com.asesoria.contable.app_ac.model.entity.Usuario;
-import com.asesoria.contable.app_ac.repository.DeclaracionRepository;
-import com.asesoria.contable.app_ac.service.ClienteService;
 import com.asesoria.contable.app_ac.service.DeclaracionService;
-import com.asesoria.contable.app_ac.utils.enums.CronogramaVencimientoSunat;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,9 +12,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-import java.time.YearMonth;
 import java.util.List;
+
+import com.asesoria.contable.app_ac.utils.enums.DeclaracionEstado;
+import com.asesoria.contable.app_ac.utils.enums.EstadoContador;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/v1/declaraciones")
@@ -26,8 +26,6 @@ import java.util.List;
 public class DeclaracionController {
 
     private final DeclaracionService declaracionService;
-    private final ClienteService clienteService;
-    private final DeclaracionRepository declaracionRepository;
 
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     @GetMapping("/{id}")
@@ -74,35 +72,31 @@ public class DeclaracionController {
     @PreAuthorize("hasRole('CLIENTE')")
     @GetMapping("/actual")
     public ResponseEntity<DeclaracionResponse> generarDeclaracionSiNoExiste(@AuthenticationPrincipal Usuario usuario) {
-        Cliente cliente = clienteService.findEntityByUsuarioId(usuario.getId());
-        String ruc = cliente.getRucDni(); // asumiendo que lo tienes
+        DeclaracionResponse declaracion = declaracionService.generarDeclaracionSiNoExiste(usuario);
+        return ResponseEntity.ok(declaracion);
+    }
 
-        // 1. Periodo tributario a declarar (el mes anterior al actual)
-        YearMonth periodo = YearMonth.now().minusMonths(1); // Ej: 2025-06
+    @PreAuthorize("hasRole('CLIENTE')")
+    @GetMapping("/mis-declaraciones")
+    public ResponseEntity<List<DeclaracionResponse>> getMisDeclaraciones(
+            @AuthenticationPrincipal Usuario usuario,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin,
+            @RequestParam(required = false) DeclaracionEstado estado,
+            @RequestParam(required = false) EstadoContador estadoContador) {
 
-        // 2. Obtener último dígito del RUC
-        int ultimoDigito = Character.getNumericValue(ruc.charAt(ruc.length() - 1));
+        List<DeclaracionResponse> declaraciones = declaracionService.buscarMisDeclaraciones(
+                usuario, fechaInicio, fechaFin, estado, estadoContador);
 
-        // 3. Calcular fecha límite
-        LocalDate fechaLimite = CronogramaVencimientoSunat.getFechaVencimiento(periodo.toString(), ultimoDigito);
+        return ResponseEntity.ok(declaraciones);
+    }
 
-        // 4. Verificar si ya existe
-        boolean existe = declaracionRepository.existsByClienteIdAndPeriodoTributarioAndTipo(cliente.getId(), periodo.atDay(1), "REGULAR");
-        if (existe) {
-            return ResponseEntity.ok().build(); // ya existe, no se crea nada
-        }
-
-        // 5. Crear nueva declaración PENDIENTE
-        Declaracion declaracion = new Declaracion();
-        declaracion.setCliente(cliente);
-        declaracion.setPeriodoTributario(periodo.atDay(1));
-        declaracion.setTipo("REGULAR");
-        declaracion.setFechaLimite(fechaLimite);
-        declaracion.setEstadoCliente("PENDIENTE");
-        declaracion.setEstadoContador("PENDIENTE");
-
-        declaracionRepository.save(declaracion);
-
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    @PreAuthorize("hasRole('CLIENTE')")
+    @PatchMapping("/{id}/notificar-contador")
+    public ResponseEntity<DeclaracionResponse> notificarContador(
+            @PathVariable Long id,
+            @AuthenticationPrincipal Usuario usuario) {
+        DeclaracionResponse declaracionActualizada = declaracionService.notificarContador(id, usuario);
+        return ResponseEntity.ok(declaracionActualizada);
     }
 }

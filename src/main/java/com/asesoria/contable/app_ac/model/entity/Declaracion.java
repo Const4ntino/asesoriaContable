@@ -1,5 +1,6 @@
 package com.asesoria.contable.app_ac.model.entity;
 
+import com.asesoria.contable.app_ac.utils.enums.DeclaracionEstado;
 import com.asesoria.contable.app_ac.utils.enums.EstadoCliente;
 import com.asesoria.contable.app_ac.utils.enums.EstadoContador;
 import jakarta.persistence.*;
@@ -76,6 +77,10 @@ public class Declaracion {
 
     @Column(name = "fecha_actualizacion")
     private LocalDateTime fechaActualizacion;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "estado")
+    private DeclaracionEstado estado;
 
     @PrePersist
     protected void onCreate() {
