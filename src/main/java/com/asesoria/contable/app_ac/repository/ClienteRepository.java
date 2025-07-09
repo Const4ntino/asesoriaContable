@@ -21,4 +21,6 @@ public interface ClienteRepository extends JpaRepository<Cliente, Long>, JpaSpec
 
     @Query("SELECT c.contador.id, COUNT(c.id) FROM Cliente c WHERE c.contador.id IN :contadorIds GROUP BY c.contador.id")
     List<Object[]> countClientesByContadorIds(List<Long> contadorIds);
+
+    List<Cliente> findAllByContadorId(Long contadorId);
 }

@@ -4,6 +4,9 @@ import com.asesoria.contable.app_ac.model.dto.ContadorRequest;
 import com.asesoria.contable.app_ac.model.dto.ContadorResponse;
 import com.asesoria.contable.app_ac.model.entity.Cliente;
 
+import com.asesoria.contable.app_ac.model.dto.ClienteConMetricasResponse;
+import com.asesoria.contable.app_ac.model.entity.Usuario;
+
 import java.util.List;
 
 public interface ContadorService {
@@ -16,4 +19,5 @@ public interface ContadorService {
     void deleteById(Long id);
     List<ContadorResponse> searchContadores(String searchTerm, String sortBy, String sortOrder);
 
+    List<ClienteConMetricasResponse> getMisClientesConMetricas(Usuario usuario);
 }

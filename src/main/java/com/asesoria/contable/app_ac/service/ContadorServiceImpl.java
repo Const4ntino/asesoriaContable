@@ -3,13 +3,17 @@ package com.asesoria.contable.app_ac.service;
 import com.asesoria.contable.app_ac.exceptions.ContadorNotFoundException;
 import com.asesoria.contable.app_ac.exceptions.UsuarioNotFoundException;
 import com.asesoria.contable.app_ac.mapper.ContadorMapper;
+import com.asesoria.contable.app_ac.model.dto.ClienteConMetricasResponse;
 import com.asesoria.contable.app_ac.model.dto.ContadorRequest;
 import com.asesoria.contable.app_ac.model.dto.ContadorResponse;
+import com.asesoria.contable.app_ac.model.entity.Cliente;
 import com.asesoria.contable.app_ac.model.entity.Contador;
 import com.asesoria.contable.app_ac.model.entity.Usuario;
 import com.asesoria.contable.app_ac.repository.ClienteRepository;
 import com.asesoria.contable.app_ac.repository.ContadorRepository;
 import com.asesoria.contable.app_ac.repository.UsuarioRepository;
+import com.asesoria.contable.app_ac.repository.EgresoRepository;
+import com.asesoria.contable.app_ac.repository.IngresoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -18,6 +22,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import jakarta.persistence.criteria.Predicate;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +38,8 @@ public class ContadorServiceImpl implements ContadorService {
     private final ContadorRepository contadorRepository;
     private final ClienteRepository clienteRepository;
     private final ContadorMapper contadorMapper;
+    private final IngresoRepository ingresoRepository;
+    private final EgresoRepository egresoRepository;
 
     @Override
     public ContadorResponse findById(Long id) {
@@ -153,6 +162,36 @@ public class ContadorServiceImpl implements ContadorService {
         return contadores.stream().map(contador -> {
             ContadorResponse response = contadorMapper.toContadorResponse(contador);
             response.setNumeroClientes(clienteCounts.getOrDefault(contador.getId(), 0L));
+            return response;
+        }).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ClienteConMetricasResponse> getMisClientesConMetricas(Usuario usuario) {
+        Contador contador = contadorRepository.findByUsuarioId(usuario.getId())
+                .orElseThrow(ContadorNotFoundException::new);
+
+        List<Cliente> clientes = clienteRepository.findAllByContadorId(contador.getId());
+
+        YearMonth mesActual = YearMonth.now();
+        LocalDate inicioMes = mesActual.atDay(1);
+        LocalDate finMes = mesActual.atEndOfMonth();
+
+        return clientes.stream().map(cliente -> {
+            BigDecimal totalIngresos = ingresoRepository.sumMontoByClienteIdAndFechaBetween(cliente.getId(), inicioMes, finMes);
+            BigDecimal totalEgresos = egresoRepository.sumMontoByClienteIdAndFechaBetween(cliente.getId(), inicioMes, finMes);
+            BigDecimal utilidad = totalIngresos.subtract(totalEgresos);
+
+            ClienteConMetricasResponse response = new ClienteConMetricasResponse();
+            response.setId(cliente.getId());
+            response.setNombres(cliente.getNombres());
+            response.setApellidos(cliente.getApellidos());
+            response.setRucDni(cliente.getRucDni());
+            response.setRegimen(cliente.getRegimen().toString());
+            response.setTotalIngresosMesActual(totalIngresos);
+            response.setTotalEgresosMesActual(totalEgresos);
+            response.setUtilidadMesActual(utilidad);
+
             return response;
         }).collect(Collectors.toList());
     }

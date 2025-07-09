@@ -9,12 +9,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import com.asesoria.contable.app_ac.model.dto.ClienteConMetricasResponse;
+import com.asesoria.contable.app_ac.model.entity.Usuario;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+
 import java.net.URI;
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/contadores")
+@RequestMapping("/api/v1/contadores")
 public class ContadorController {
 
     private final ContadorService contadorService;
@@ -66,5 +70,13 @@ public class ContadorController {
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortOrder) {
         return contadorService.searchContadores(searchTerm, sortBy, sortOrder);
+    }
+
+    @PreAuthorize("hasRole('CONTADOR')")
+    @GetMapping("/mis-clientes/metricas")
+    public ResponseEntity<List<ClienteConMetricasResponse>> getMisClientesConMetricas(
+            @AuthenticationPrincipal Usuario usuario) {
+        List<ClienteConMetricasResponse> clientes = contadorService.getMisClientesConMetricas(usuario);
+        return ResponseEntity.ok(clientes);
     }
 }

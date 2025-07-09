@@ -102,7 +102,13 @@ public class DeclaracionServiceImpl implements DeclaracionService {
         YearMonth periodo = YearMonth.now().minusMonths(1);
         LocalDate periodoTributario = periodo.atDay(1);
 
-        Optional<Declaracion> declaracionExistente = declaracionRepository.findByClienteIdAndPeriodoTributarioAndTipo(cliente.getId(), periodoTributario, "CREADO");
+        // Verificar si ya existe una declaración con estado CREADO
+        Optional<Declaracion> declaracionExistente =
+                declaracionRepository.findByClienteIdAndPeriodoTributarioAndEstado(
+                        cliente.getId(),
+                        periodoTributario,
+                        DeclaracionEstado.CREADO
+                );
 
         if (declaracionExistente.isPresent()) {
             return declaracionMapper.toDeclaracionResponse(declaracionExistente.get());
