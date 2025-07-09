@@ -19,5 +19,6 @@ public interface ContadorService {
     void deleteById(Long id);
     List<ContadorResponse> searchContadores(String searchTerm, String sortBy, String sortOrder);
 
-    List<ClienteConMetricasResponse> getMisClientesConMetricas(Usuario usuario);
+    List<ClienteConMetricasResponse> getClientesNaturalesConMetricas(Usuario usuario, String regimen, String rucDni, String nombres, String sortBy, String sortOrder);
+    List<ClienteConMetricasResponse> getClientesJuridicosConMetricas(Usuario usuario, String regimen, String rucDni, String nombres, String sortBy, String sortOrder);
 }

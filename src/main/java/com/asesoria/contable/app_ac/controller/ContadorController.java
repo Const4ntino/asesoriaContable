@@ -73,10 +73,28 @@ public class ContadorController {
     }
 
     @PreAuthorize("hasRole('CONTADOR')")
-    @GetMapping("/mis-clientes/metricas")
-    public ResponseEntity<List<ClienteConMetricasResponse>> getMisClientesConMetricas(
-            @AuthenticationPrincipal Usuario usuario) {
-        List<ClienteConMetricasResponse> clientes = contadorService.getMisClientesConMetricas(usuario);
+    @GetMapping("/mis-clientes/naturales/metricas")
+    public ResponseEntity<List<ClienteConMetricasResponse>> getClientesNaturalesConMetricas(
+            @AuthenticationPrincipal Usuario usuario,
+            @RequestParam(required = false) String regimen,
+            @RequestParam(required = false) String rucDni,
+            @RequestParam(required = false) String nombres,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String sortOrder) {
+        List<ClienteConMetricasResponse> clientes = contadorService.getClientesNaturalesConMetricas(usuario, regimen, rucDni, nombres, sortBy, sortOrder);
+        return ResponseEntity.ok(clientes);
+    }
+
+    @PreAuthorize("hasRole('CONTADOR')")
+    @GetMapping("/mis-clientes/juridicos/metricas")
+    public ResponseEntity<List<ClienteConMetricasResponse>> getClientesJuridicosConMetricas(
+            @AuthenticationPrincipal Usuario usuario,
+            @RequestParam(required = false) String regimen,
+            @RequestParam(required = false) String rucDni,
+            @RequestParam(required = false) String nombres,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String sortOrder) {
+        List<ClienteConMetricasResponse> clientes = contadorService.getClientesJuridicosConMetricas(usuario, regimen, rucDni, nombres, sortBy, sortOrder);
         return ResponseEntity.ok(clientes);
     }
 }

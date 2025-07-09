@@ -15,6 +15,9 @@ import com.asesoria.contable.app_ac.repository.ContadorRepository;
 import com.asesoria.contable.app_ac.repository.UsuarioRepository;
 import com.asesoria.contable.app_ac.repository.EgresoRepository;
 import com.asesoria.contable.app_ac.repository.IngresoRepository;
+import com.asesoria.contable.app_ac.utils.enums.Regimen;
+import com.asesoria.contable.app_ac.utils.enums.TipoCliente;
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -22,11 +25,11 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import jakarta.persistence.criteria.Predicate;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -169,27 +172,66 @@ public class ContadorServiceImpl implements ContadorService {
     }
 
     @Override
-    public List<ClienteConMetricasResponse> getMisClientesConMetricas(Usuario usuario) {
+    public List<ClienteConMetricasResponse> getClientesNaturalesConMetricas(Usuario usuario, String regimen, String rucDni, String nombres, String sortBy, String sortOrder) {
+        return getClientesConMetricas(usuario, TipoCliente.PERSONA_NATURAL, regimen, rucDni, nombres, sortBy, sortOrder);
+    }
+
+    @Override
+    public List<ClienteConMetricasResponse> getClientesJuridicosConMetricas(Usuario usuario, String regimen, String rucDni, String nombres, String sortBy, String sortOrder) {
+        return getClientesConMetricas(usuario, TipoCliente.PERSONA_JURIDICA, regimen, rucDni, nombres, sortBy, sortOrder);
+    }
+
+    private List<ClienteConMetricasResponse> getClientesConMetricas(Usuario usuario, TipoCliente tipoCliente, String regimen, String rucDni, String nombres, String sortBy, String sortOrder) {
         Contador contador = contadorRepository.findByUsuarioId(usuario.getId())
                 .orElseThrow(ContadorNotFoundException::new);
 
-        List<Cliente> clientes = clienteRepository.findAllByContadorId(contador.getId());
+        Specification<Cliente> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.equal(root.get("contador"), contador));
+            predicates.add(cb.equal(root.get("tipoCliente"), tipoCliente));
+
+            if (StringUtils.hasText(regimen)) {
+                predicates.add(cb.equal(root.get("regimen"), Regimen.valueOf(regimen.toUpperCase())));
+            }
+            if (StringUtils.hasText(rucDni)) {
+                predicates.add(cb.like(cb.lower(root.get("rucDni")), "%" + rucDni.toLowerCase() + "%"));
+            }
+            if (StringUtils.hasText(nombres)) {
+                String lowerCaseNombres = nombres.toLowerCase();
+                predicates.add(cb.or(
+                        cb.like(cb.lower(root.get("nombres")), "%" + lowerCaseNombres + "%"),
+                        cb.like(cb.lower(root.get("apellidos")), "%" + lowerCaseNombres + "%")
+                ));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+
+        // Apply sorting for direct Cliente fields at DB level
+        Sort sort = Sort.unsorted();
+        if (StringUtils.hasText(sortBy)) {
+            Sort.Direction direction = Sort.Direction.ASC;
+            if (StringUtils.hasText(sortOrder) && sortOrder.equalsIgnoreCase("DESC")) {
+                direction = Sort.Direction.DESC;
+            }
+            // Only apply sorting for direct fields here
+            if (sortBy.equals("nombres") || sortBy.equals("apellidos") || sortBy.equals("rucDni") || sortBy.equals("regimen")) {
+                sort = Sort.by(direction, sortBy);
+            }
+        }
+
+        List<Cliente> clientes = clienteRepository.findAll(spec, sort);
 
         YearMonth mesActual = YearMonth.now();
         LocalDate inicioMes = mesActual.atDay(1);
         LocalDate finMes = mesActual.atEndOfMonth();
 
-        return clientes.stream().map(cliente -> {
+        List<ClienteConMetricasResponse> results = clientes.stream().map(cliente -> {
             BigDecimal totalIngresos = ingresoRepository.sumMontoByClienteIdAndFechaBetween(cliente.getId(), inicioMes, finMes);
             BigDecimal totalEgresos = egresoRepository.sumMontoByClienteIdAndFechaBetween(cliente.getId(), inicioMes, finMes);
             BigDecimal utilidad = totalIngresos.subtract(totalEgresos);
 
             ClienteConMetricasResponse response = new ClienteConMetricasResponse();
-//            response.setId(cliente.getId());
-//            response.setNombres(cliente.getNombres());
-//            response.setApellidos(cliente.getApellidos());
-//            response.setRucDni(cliente.getRucDni());
-//            response.setRegimen(cliente.getRegimen().toString());
             response.setCliente(clienteMapper.toClienteResponse(cliente));
             response.setTotalIngresosMesActual(totalIngresos);
             response.setTotalEgresosMesActual(totalEgresos);
@@ -197,5 +239,32 @@ public class ContadorServiceImpl implements ContadorService {
 
             return response;
         }).collect(Collectors.toList());
+
+        // Apply in-memory sorting for calculated fields
+        if (StringUtils.hasText(sortBy)) {
+            Comparator<ClienteConMetricasResponse> comparator = null;
+            switch (sortBy) {
+                case "totalIngresosMesActual":
+                    comparator = Comparator.comparing(ClienteConMetricasResponse::getTotalIngresosMesActual);
+                    break;
+                case "totalEgresosMesActual":
+                    comparator = Comparator.comparing(ClienteConMetricasResponse::getTotalEgresosMesActual);
+                    break;
+                case "utilidadMesActual":
+                    comparator = Comparator.comparing(ClienteConMetricasResponse::getUtilidadMesActual);
+                    break;
+                // For other fields, sorting is already applied by JPA
+            }
+
+            if (comparator != null) {
+                if (StringUtils.hasText(sortOrder) && sortOrder.equalsIgnoreCase("DESC")) {
+                    results.sort(comparator.reversed());
+                } else {
+                    results.sort(comparator);
+                }
+            }
+        }
+
+        return results;
     }
 }
