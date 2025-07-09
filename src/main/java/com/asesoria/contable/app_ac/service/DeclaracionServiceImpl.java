@@ -3,14 +3,15 @@ package com.asesoria.contable.app_ac.service;
 import com.asesoria.contable.app_ac.exceptions.ClienteNotFoundException;
 import com.asesoria.contable.app_ac.exceptions.DeclaracionNotFoundException;
 import com.asesoria.contable.app_ac.mapper.DeclaracionMapper;
+import com.asesoria.contable.app_ac.model.dto.AlertaContadorRequest;
 import com.asesoria.contable.app_ac.model.dto.DeclaracionRequest;
 import com.asesoria.contable.app_ac.model.dto.DeclaracionResponse;
 import com.asesoria.contable.app_ac.model.dto.PeriodoVencimientoResponse;
-import com.asesoria.contable.app_ac.model.entity.Cliente;
-import com.asesoria.contable.app_ac.model.entity.Declaracion;
-import com.asesoria.contable.app_ac.model.entity.Usuario;
+import com.asesoria.contable.app_ac.model.entity.*;
 import com.asesoria.contable.app_ac.repository.ClienteRepository;
+import com.asesoria.contable.app_ac.repository.ContadorRepository;
 import com.asesoria.contable.app_ac.repository.DeclaracionRepository;
+import com.asesoria.contable.app_ac.repository.UsuarioRepository;
 import com.asesoria.contable.app_ac.utils.enums.CronogramaVencimientoSunat;
 import com.asesoria.contable.app_ac.utils.enums.DeclaracionEstado;
 import com.asesoria.contable.app_ac.utils.enums.EstadoCliente;
@@ -22,6 +23,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +38,9 @@ public class DeclaracionServiceImpl implements DeclaracionService {
     private final ClienteRepository clienteRepository;
     private final DeclaracionMapper declaracionMapper;
     private final ClienteService clienteService;
+    private final UsuarioRepository usuarioRepository;
+    private final ContadorRepository contadorRepository;
+    private final AlertaContadorService alertaContadorService;
 
     @Override
     public DeclaracionResponse findById(Long id) {
@@ -170,6 +175,17 @@ public class DeclaracionServiceImpl implements DeclaracionService {
         }
 
         declaracion.setEstado(DeclaracionEstado.CONTADOR_NOTIFICADO);
+
+        // Crear alerta para el contador
+        if (declaracion.getCliente().getContador() != null) {
+            Contador contador = declaracion.getCliente().getContador();
+            AlertaContadorRequest alertaRequest = new AlertaContadorRequest();
+            alertaRequest.setIdContador(contador.getId());
+            alertaRequest.setDescripcion("El cliente " + declaracion.getCliente().getNombres() + " " + declaracion.getCliente().getApellidos() + " ha notificado que la declaración del período " + declaracion.getPeriodoTributario().getMonth().name() + "-" + declaracion.getPeriodoTributario().getYear() + " se aproxima a su fecha de vencimiento.");
+            alertaRequest.setFechaExpiracion(LocalDateTime.now().plusDays(10));
+            // El estado se establece por defecto en ACTIVO en el @PrePersist de AlertaContador
+            alertaContadorService.save(alertaRequest);
+        }
 
         Declaracion declaracionActualizada = declaracionRepository.save(declaracion);
         return declaracionMapper.toDeclaracionResponse(declaracionActualizada);
