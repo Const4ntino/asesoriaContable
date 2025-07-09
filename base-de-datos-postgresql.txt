@@ -129,3 +129,20 @@ CREATE INDEX idx_declaracion_cliente_periodo ON declaracion(id_cliente, periodo_
 CREATE INDEX idx_obligacion_cliente_periodo ON obligacion(id_cliente, periodo);
 CREATE INDEX idx_pago_obligacion ON pago(id_obligacion);
 
+CREATE TABLE alerta_contador (
+    id_alerta BIGSERIAL PRIMARY KEY,
+    id_contador BIGINT NOT NULL REFERENCES contador(id_contador) ON DELETE CASCADE,
+    descripcion TEXT NOT NULL,
+    estado VARCHAR(20) DEFAULT 'ACTIVO' CHECK (estado IN ('ACTIVO', 'VISTO', 'RESUELTO')),
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    fecha_expiracion TIMESTAMP NOT NULL
+);
+
+CREATE TABLE alerta_cliente (
+    id_alerta BIGSERIAL PRIMARY KEY,
+    id_cliente BIGINT NOT NULL REFERENCES cliente(id_cliente) ON DELETE CASCADE,
+    descripcion TEXT NOT NULL,
+    estado VARCHAR(20) DEFAULT 'ACTIVO' CHECK (estado IN ('ACTIVO', 'VISTO', 'RESUELTO')),
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    fecha_expiracion TIMESTAMP NOT NULL
+);
