@@ -24,4 +24,6 @@ public interface ObligacionService {
     List<ObligacionResponse> findByClienteId(Long clienteId);
 
     List<ObligacionResponse> getLatestObligacionesForMyClients(Usuario usuario);
+
+    List<ObligacionResponse> buscarMisObligaciones(Usuario usuario);
 }

@@ -29,6 +29,7 @@ public class ObligacionServiceImpl implements ObligacionService {
     private final ClienteRepository clienteRepository;
     private final DeclaracionRepository declaracionRepository;
     private final ContadorRepository contadorRepository;
+    private final ClienteService clienteService;
 
     @Override
     public List<ObligacionResponse> findAll() {
@@ -136,6 +137,14 @@ public class ObligacionServiceImpl implements ObligacionService {
         obligacion.setEstado(EstadoObligacion.PENDIENTE);
 
         return obligacionMapper.convertToResponse(obligacionRepository.save(obligacion));
+    }
+
+    @Override
+    public List<ObligacionResponse> buscarMisObligaciones(Usuario usuario) {
+        Cliente cliente = clienteService.findEntityByUsuarioId(usuario.getId());
+        return obligacionRepository.findByClienteId(cliente.getId()).stream()
+                .map(obligacionMapper::convertToResponse)
+                .collect(Collectors.toList());
     }
 }
 

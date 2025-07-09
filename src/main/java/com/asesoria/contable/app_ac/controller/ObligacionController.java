@@ -77,4 +77,11 @@ public class ObligacionController {
         List<ObligacionResponse> obligaciones = obligacionService.getLatestObligacionesForMyClients(usuario);
         return ResponseEntity.ok(obligaciones);
     }
+
+    @PreAuthorize("hasRole('CLIENTE')")
+    @GetMapping("/mis-obligaciones")
+    public ResponseEntity<List<ObligacionResponse>> getMisObligaciones(@AuthenticationPrincipal Usuario usuario) {
+        List<ObligacionResponse> obligaciones = obligacionService.buscarMisObligaciones(usuario);
+        return ResponseEntity.ok(obligaciones);
+    }
 }
