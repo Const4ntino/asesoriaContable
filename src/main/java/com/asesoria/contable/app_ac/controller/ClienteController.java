@@ -100,7 +100,7 @@ public class ClienteController {
         return clienteService.searchClientes(searchTerm, tipoCliente, regimen, sortBy, sortOrder);
     }
 
-    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @PreAuthorize("hasRole('ADMINISTRADOR') or hasRole('CONTADOR')")
     @GetMapping("/metricas-declaracion/{id}")
     public ResponseEntity<MetricasDeclaracionResponse> getMetricasDeclaracion(@PathVariable Long id) {
         MetricasDeclaracionResponse metricas = clienteService.getMetricasDeclaracion(id);
