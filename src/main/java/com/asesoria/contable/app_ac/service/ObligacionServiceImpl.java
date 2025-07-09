@@ -3,6 +3,7 @@ package com.asesoria.contable.app_ac.service;
 import com.asesoria.contable.app_ac.exceptions.ClienteNotFoundException;
 import com.asesoria.contable.app_ac.exceptions.DeclaracionNotFoundException;
 import com.asesoria.contable.app_ac.exceptions.ObligacionNotFoundException;
+import com.asesoria.contable.app_ac.mapper.DeclaracionMapper;
 import com.asesoria.contable.app_ac.mapper.ObligacionMapper;
 import com.asesoria.contable.app_ac.model.dto.DeclaracionRequest;
 import com.asesoria.contable.app_ac.model.dto.ObligacionRequest;
@@ -30,6 +31,7 @@ public class ObligacionServiceImpl implements ObligacionService {
     private final DeclaracionRepository declaracionRepository;
     private final ContadorRepository contadorRepository;
     private final ClienteService clienteService;
+    private final DeclaracionMapper declaracionMapper;
 
     @Override
     public List<ObligacionResponse> findAll() {
@@ -130,6 +132,7 @@ public class ObligacionServiceImpl implements ObligacionService {
 
         Obligacion obligacion = new Obligacion();
         obligacion.setCliente(cliente);
+        obligacion.setDeclaracion(declaracionMapper.toDeclaracion(declaracionRequest));
         obligacion.setTipo(declaracionRequest.getTipo());
         obligacion.setPeriodo(declaracionRequest.getPeriodoTributario());
         obligacion.setMonto(declaracionRequest.getTotalPagarDeclaracion());

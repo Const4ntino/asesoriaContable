@@ -32,7 +32,11 @@ public class SecurityConfig {
                 })
                 .authorizeHttpRequests(authRequest ->
                         authRequest
-                                .requestMatchers("/auth/login", "/auth/register").permitAll()
+                                .requestMatchers(
+                                        "/auth/login",
+                                        "/auth/register",
+                                        "/uploads/**" // ✅ permite acceso público a archivos estáticos
+                                ).permitAll()
                                 .anyRequest().authenticated())
                 .authenticationProvider(authProvider)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
