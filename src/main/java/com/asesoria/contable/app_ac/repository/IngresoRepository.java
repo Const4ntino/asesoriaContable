@@ -1,6 +1,7 @@
 package com.asesoria.contable.app_ac.repository;
 
 import com.asesoria.contable.app_ac.model.entity.Ingreso;
+import com.asesoria.contable.app_ac.utils.enums.TipoTributario;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import org.springframework.data.jpa.repository.Query;
@@ -29,4 +30,10 @@ public interface IngresoRepository extends JpaRepository<Ingreso, Long> {
 
     @Query("SELECT COUNT(i) FROM Ingreso i WHERE i.cliente.id = :clienteId AND i.fecha >= :startDate AND i.fecha <= :endDate")
     Long countByClienteIdAndFechaBetween(@Param("clienteId") Long clienteId, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
+    @Query("SELECT COALESCE(SUM(i.monto), 0) FROM Ingreso i WHERE i.cliente.id = :clienteId AND i.tipoTributario = :tipoTributario AND i.fecha BETWEEN :startDate AND :endDate")
+    BigDecimal sumMontoByClienteIdAndTipoTributarioAndFechaBetween(@Param("clienteId") Long clienteId, @Param("tipoTributario") TipoTributario tipoTributario, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
+    @Query("SELECT COALESCE(SUM(i.montoIgv), 0) FROM Ingreso i WHERE i.cliente.id = :clienteId AND i.fecha BETWEEN :startDate AND :endDate")
+    BigDecimal sumMontoIgvByClienteIdAndFechaBetween(@Param("clienteId") Long clienteId, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 }

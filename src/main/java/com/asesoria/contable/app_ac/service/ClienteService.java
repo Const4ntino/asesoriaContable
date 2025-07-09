@@ -6,6 +6,8 @@ import com.asesoria.contable.app_ac.model.entity.Cliente;
 
 import java.util.List;
 
+import com.asesoria.contable.app_ac.model.dto.MetricasDeclaracionResponse;
+
 public interface ClienteService {
 
     ClienteResponse findById(Long id);
@@ -20,4 +22,5 @@ public interface ClienteService {
     List<ClienteResponse> searchClientes(String searchTerm, String tipoCliente, String regimen, String sortBy, String sortOrder);
     // Para devolver un cliente y no un cliente response
     Cliente findEntityByUsuarioId(Long usuarioId);
+    MetricasDeclaracionResponse getMetricasDeclaracion(Long clienteId);
 }

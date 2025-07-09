@@ -1,6 +1,7 @@
 package com.asesoria.contable.app_ac.repository;
 
 import com.asesoria.contable.app_ac.model.entity.Egreso;
+import com.asesoria.contable.app_ac.utils.enums.TipoTributario;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -25,4 +26,10 @@ public interface EgresoRepository extends JpaRepository<Egreso, Long> {
 
     @Query("SELECT new map(e.descripcion as descripcion, e.monto as monto, e.fecha as fecha) FROM Egreso e WHERE e.cliente.id = :clienteId AND e.descripcion IN (SELECT e2.descripcion FROM Egreso e2 WHERE e2.cliente.id = :clienteId GROUP BY e2.descripcion HAVING COUNT(e2.descripcion) > 1)")
     List<Map<String, Object>> findEgresosRecurrentes(@Param("clienteId") Long clienteId);
+
+    @Query("SELECT COALESCE(SUM(e.monto), 0) FROM Egreso e WHERE e.cliente.id = :clienteId AND e.tipoTributario = :tipoTributario AND e.fecha BETWEEN :startDate AND :endDate")
+    BigDecimal sumMontoByClienteIdAndTipoTributarioAndFechaBetween(@Param("clienteId") Long clienteId, @Param("tipoTributario") TipoTributario tipoTributario, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
+    @Query("SELECT COALESCE(SUM(e.montoIgv), 0) FROM Egreso e WHERE e.cliente.id = :clienteId AND e.fecha BETWEEN :startDate AND :endDate")
+    BigDecimal sumMontoIgvByClienteIdAndFechaBetween(@Param("clienteId") Long clienteId, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 }

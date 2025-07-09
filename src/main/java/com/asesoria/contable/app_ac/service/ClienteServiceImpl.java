@@ -6,6 +6,7 @@ import com.asesoria.contable.app_ac.exceptions.UsuarioNotFoundException;
 import com.asesoria.contable.app_ac.mapper.ClienteMapper;
 import com.asesoria.contable.app_ac.model.dto.ClienteRequest;
 import com.asesoria.contable.app_ac.model.dto.ClienteResponse;
+import com.asesoria.contable.app_ac.model.dto.MetricasDeclaracionResponse;
 import com.asesoria.contable.app_ac.model.entity.Cliente;
 import com.asesoria.contable.app_ac.model.entity.Contador;
 import com.asesoria.contable.app_ac.model.entity.Usuario;
@@ -21,6 +22,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,6 +35,8 @@ public class ClienteServiceImpl implements ClienteService {
     private final UsuarioRepository usuarioRepository;
     private final ContadorRepository contadorRepository;
     private final ClienteMapper clienteMapper;
+    private final IngresoService ingresoService;
+    private final EgresoService egresoService;
 
     @Override
     public ClienteResponse findById(Long id) {
@@ -266,5 +270,36 @@ public class ClienteServiceImpl implements ClienteService {
     public Cliente findEntityByUsuarioId(Long usuarioId) {
         return clienteRepository.findByUsuarioId(usuarioId)
                 .orElseThrow(ClienteNotFoundException::new);
+    }
+
+    @Override
+    public MetricasDeclaracionResponse getMetricasDeclaracion(Long clienteId) {
+        // Verificar que el cliente existe
+        if (!clienteRepository.existsById(clienteId)) {
+            throw new ClienteNotFoundException();
+        }
+
+        // Ingresos
+        BigDecimal ingresosGravados = ingresoService.getSumaIngresosGravadosMesAnterior(clienteId);
+        BigDecimal ingresosExonerados = ingresoService.getSumaIngresosExoneradosMesAnterior(clienteId);
+        BigDecimal ingresosInafectos = ingresoService.getSumaIngresosInafectosMesAnterior(clienteId);
+        BigDecimal totalIgvIngresos = ingresoService.getSumaIgvIngresosMesAnterior(clienteId);
+
+        // Egresos
+        BigDecimal egresosGravados = egresoService.getSumaEgresosGravadosMesAnterior(clienteId);
+        BigDecimal egresosExonerados = egresoService.getSumaEgresosExoneradosMesAnterior(clienteId);
+        BigDecimal egresosInafectos = egresoService.getSumaEgresosInafectosMesAnterior(clienteId);
+        BigDecimal totalIgvEgresos = egresoService.getSumaIgvEgresosMesAnterior(clienteId);
+
+        return new MetricasDeclaracionResponse(
+                ingresosGravados,
+                ingresosExonerados,
+                ingresosInafectos,
+                totalIgvIngresos,
+                egresosGravados,
+                egresosExonerados,
+                egresosInafectos,
+                totalIgvEgresos
+        );
     }
 }

@@ -29,4 +29,9 @@ public interface IngresoService {
     Long contarComprobantesMesActual(Long clienteId);
     Map<String, BigDecimal> obtenerIngresosPorTipoTributario(Long clienteId);
     List<Map<String, Object>> identificarIngresosRecurrentes(Long clienteId);
+
+    BigDecimal getSumaIngresosGravadosMesAnterior(Long clienteId);
+    BigDecimal getSumaIngresosExoneradosMesAnterior(Long clienteId);
+    BigDecimal getSumaIngresosInafectosMesAnterior(Long clienteId);
+    BigDecimal getSumaIgvIngresosMesAnterior(Long clienteId);
 }

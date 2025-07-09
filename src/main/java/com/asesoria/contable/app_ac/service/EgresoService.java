@@ -29,4 +29,9 @@ public interface EgresoService {
     Map<String, BigDecimal> obtenerEgresosPorTipoContabilidad(Long clienteId);
     Map<String, BigDecimal> obtenerEgresosPorTipoTributario(Long clienteId);
     List<Map<String, Object>> identificarEgresosRecurrentes(Long clienteId);
+
+    BigDecimal getSumaEgresosGravadosMesAnterior(Long clienteId);
+    BigDecimal getSumaEgresosExoneradosMesAnterior(Long clienteId);
+    BigDecimal getSumaEgresosInafectosMesAnterior(Long clienteId);
+    BigDecimal getSumaIgvEgresosMesAnterior(Long clienteId);
 }

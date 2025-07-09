@@ -2,6 +2,7 @@ package com.asesoria.contable.app_ac.controller;
 
 import com.asesoria.contable.app_ac.model.dto.ClienteRequest;
 import com.asesoria.contable.app_ac.model.dto.ClienteResponse;
+import com.asesoria.contable.app_ac.model.dto.MetricasDeclaracionResponse;
 import com.asesoria.contable.app_ac.model.entity.Usuario;
 import com.asesoria.contable.app_ac.service.ClienteService;
 import jakarta.validation.Valid;
@@ -97,5 +98,12 @@ public class ClienteController {
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortOrder) {
         return clienteService.searchClientes(searchTerm, tipoCliente, regimen, sortBy, sortOrder);
+    }
+
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @GetMapping("/metricas-declaracion/{id}")
+    public ResponseEntity<MetricasDeclaracionResponse> getMetricasDeclaracion(@PathVariable Long id) {
+        MetricasDeclaracionResponse metricas = clienteService.getMetricasDeclaracion(id);
+        return ResponseEntity.ok(metricas);
     }
 }

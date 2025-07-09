@@ -229,4 +229,36 @@ public class EgresoServiceImpl implements EgresoService {
     public List<Map<String, Object>> identificarEgresosRecurrentes(Long clienteId) {
         return egresoRepository.findEgresosRecurrentes(clienteId);
     }
+
+    @Override
+    public BigDecimal getSumaEgresosGravadosMesAnterior(Long clienteId) {
+        YearMonth mesAnterior = YearMonth.now().minusMonths(1);
+        LocalDate inicioMes = mesAnterior.atDay(1);
+        LocalDate finMes = mesAnterior.atEndOfMonth();
+        return egresoRepository.sumMontoByClienteIdAndTipoTributarioAndFechaBetween(clienteId, TipoTributario.GRAVADA, inicioMes, finMes);
+    }
+
+    @Override
+    public BigDecimal getSumaEgresosExoneradosMesAnterior(Long clienteId) {
+        YearMonth mesAnterior = YearMonth.now().minusMonths(1);
+        LocalDate inicioMes = mesAnterior.atDay(1);
+        LocalDate finMes = mesAnterior.atEndOfMonth();
+        return egresoRepository.sumMontoByClienteIdAndTipoTributarioAndFechaBetween(clienteId, TipoTributario.EXONERADA, inicioMes, finMes);
+    }
+
+    @Override
+    public BigDecimal getSumaEgresosInafectosMesAnterior(Long clienteId) {
+        YearMonth mesAnterior = YearMonth.now().minusMonths(1);
+        LocalDate inicioMes = mesAnterior.atDay(1);
+        LocalDate finMes = mesAnterior.atEndOfMonth();
+        return egresoRepository.sumMontoByClienteIdAndTipoTributarioAndFechaBetween(clienteId, TipoTributario.INAFECTA, inicioMes, finMes);
+    }
+
+    @Override
+    public BigDecimal getSumaIgvEgresosMesAnterior(Long clienteId) {
+        YearMonth mesAnterior = YearMonth.now().minusMonths(1);
+        LocalDate inicioMes = mesAnterior.atDay(1);
+        LocalDate finMes = mesAnterior.atEndOfMonth();
+        return egresoRepository.sumMontoIgvByClienteIdAndFechaBetween(clienteId, inicioMes, finMes);
+    }
 }
