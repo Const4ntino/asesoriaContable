@@ -19,7 +19,7 @@ public class ObligacionRequest {
     private String tipo;
 
     @NotNull
-    private LocalDate periodo;
+    private LocalDate periodoTributario;
 
     @NotNull
     private BigDecimal monto;

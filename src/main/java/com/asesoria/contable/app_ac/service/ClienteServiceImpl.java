@@ -24,6 +24,9 @@ import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.time.YearMonth;
+import com.asesoria.contable.app_ac.model.dto.ClienteMetricasParaContadorResponse;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -301,5 +304,36 @@ public class ClienteServiceImpl implements ClienteService {
                 egresosInafectos,
                 totalIgvEgresos
         );
+    }
+
+    @Override
+    public ClienteMetricasParaContadorResponse getIngresosEgresosMetricas(Long clienteId) {
+        Cliente cliente = clienteRepository.findById(clienteId)
+                .orElseThrow(ClienteNotFoundException::new);
+
+        // Mes actual
+        YearMonth mesActual = YearMonth.now();
+        BigDecimal ingresosMesActual = ingresoService.calcularTotalMesActual(clienteId);
+        BigDecimal egresosMesActual = egresoService.calcularTotalMesActual(clienteId);
+        BigDecimal utilidadMesActual = ingresosMesActual.subtract(egresosMesActual);
+
+        // Mes anterior
+        YearMonth mesAnterior = mesActual.minusMonths(1);
+        BigDecimal ingresosMesAnterior = ingresoService.calcularTotalMesAnterior(clienteId);
+        BigDecimal egresosMesAnterior = egresoService.calcularTotalMesAnterior(clienteId);
+        BigDecimal utilidadMesAnterior = ingresosMesAnterior.subtract(egresosMesAnterior);
+
+        return ClienteMetricasParaContadorResponse.builder()
+                .idCliente(cliente.getId())
+                .nombreCliente(cliente.getNombres() + " " + cliente.getApellidos())
+                .periodoActual(mesActual)
+                .ingresosMesActual(ingresosMesActual)
+                .egresosMesActual(egresosMesActual)
+                .utilidadMesActual(utilidadMesActual)
+                .periodoAnterior(mesAnterior)
+                .ingresosMesAnterior(ingresosMesAnterior)
+                .egresosMesAnterior(egresosMesAnterior)
+                .utilidadMesAnterior(utilidadMesAnterior)
+                .build();
     }
 }

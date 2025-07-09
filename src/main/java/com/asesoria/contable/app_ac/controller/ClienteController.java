@@ -1,5 +1,6 @@
 package com.asesoria.contable.app_ac.controller;
 
+import com.asesoria.contable.app_ac.model.dto.ClienteMetricasParaContadorResponse;
 import com.asesoria.contable.app_ac.model.dto.ClienteRequest;
 import com.asesoria.contable.app_ac.model.dto.ClienteResponse;
 import com.asesoria.contable.app_ac.model.dto.MetricasDeclaracionResponse;
@@ -104,6 +105,13 @@ public class ClienteController {
     @GetMapping("/metricas-declaracion/{id}")
     public ResponseEntity<MetricasDeclaracionResponse> getMetricasDeclaracion(@PathVariable Long id) {
         MetricasDeclaracionResponse metricas = clienteService.getMetricasDeclaracion(id);
+        return ResponseEntity.ok(metricas);
+    }
+
+    @PreAuthorize("hasRole('CONTADOR')")
+    @GetMapping("/metricas/ingresos-egresos/actual-pasado")
+    public ResponseEntity<ClienteMetricasParaContadorResponse> getIngresosEgresosMetricas(@RequestParam Long clienteId) {
+        ClienteMetricasParaContadorResponse metricas = clienteService.getIngresosEgresosMetricas(clienteId);
         return ResponseEntity.ok(metricas);
     }
 }

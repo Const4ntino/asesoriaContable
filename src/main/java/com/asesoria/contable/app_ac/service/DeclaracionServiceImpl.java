@@ -7,7 +7,9 @@ import com.asesoria.contable.app_ac.model.dto.AlertaContadorRequest;
 import com.asesoria.contable.app_ac.model.dto.DeclaracionRequest;
 import com.asesoria.contable.app_ac.model.dto.DeclaracionResponse;
 import com.asesoria.contable.app_ac.model.dto.PeriodoVencimientoResponse;
+import com.asesoria.contable.app_ac.model.dto.ObligacionRequest;
 import com.asesoria.contable.app_ac.model.entity.*;
+import com.asesoria.contable.app_ac.utils.enums.EstadoObligacion;
 import com.asesoria.contable.app_ac.repository.ClienteRepository;
 import com.asesoria.contable.app_ac.repository.ContadorRepository;
 import com.asesoria.contable.app_ac.repository.DeclaracionRepository;
@@ -41,6 +43,7 @@ public class DeclaracionServiceImpl implements DeclaracionService {
     private final UsuarioRepository usuarioRepository;
     private final ContadorRepository contadorRepository;
     private final AlertaContadorService alertaContadorService;
+    private final ObligacionService obligacionService;
 
     @Override
     public DeclaracionResponse findById(Long id) {
@@ -272,12 +275,6 @@ public class DeclaracionServiceImpl implements DeclaracionService {
                 predicates.add(criteriaBuilder.like(root.get("cliente").get("rucDni"), "%" + rucDniCliente + "%"));
             }
             if (periodoTributarioMes != null) {
-                // Assuming periodoTributario is stored as LocalDate, we extract month and year
-                // For year 2025, we need to ensure the year is also considered.
-                // This might require a function in the database or a more complex predicate.
-                // For simplicity, let's assume we are filtering for the month in any year for now,
-                // or we can add a year parameter if needed.
-                // Given the request specifies "mes del año 2025", we should filter by year as well.
                 predicates.add(criteriaBuilder.equal(criteriaBuilder.function("MONTH", Integer.class, root.get("periodoTributario")), periodoTributarioMes));
                 predicates.add(criteriaBuilder.equal(criteriaBuilder.function("YEAR", Integer.class, root.get("periodoTributario")), 2025));
             }
@@ -293,25 +290,6 @@ public class DeclaracionServiceImpl implements DeclaracionService {
 
         // Get all declarations for the accountant's clients that match the filters
         List<Declaracion> filteredDeclarations = declaracionRepository.findAll(spec);
-
-        // Now, from these filtered declarations, we need to get the latest for each client.
-        // This logic is similar to findLatestDeclarationsForClients but applied to the filtered set.
-        // A more efficient way might be to integrate this into the Specification if possible,
-        // or to perform a post-processing step.
-        // For now, let's re-use the existing findLatestDeclarationsForClients logic
-        // by filtering the clientIds first based on the search criteria.
-
-        // This approach might not be the most efficient if the initial filteredDeclarations list is very large.
-        // A better approach would be to modify findLatestDeclarationsForClients to accept a Specification,
-        // or to build a more complex query directly in the repository.
-
-        // For simplicity and re-using existing logic, let's filter the clientIds based on the search criteria
-        // and then call findLatestDeclarationsForClients.
-        // This means the "latest" will be among the *filtered* clients, not necessarily the latest overall
-        // if a client has multiple declarations matching the filter.
-
-        // Let's refine this. The request is "ultimas-declaraciones/filtrar", implying we first get the latest
-        // for each client, and *then* apply the filters to *those* latest declarations.
 
         List<Declaracion> latestDeclarations = declaracionRepository.findLatestDeclarationsForClients(clienteIdsDelContador);
 
@@ -344,5 +322,40 @@ public class DeclaracionServiceImpl implements DeclaracionService {
         return result.stream()
                 .map(declaracionMapper::toDeclaracionResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public DeclaracionResponse marcarComoDeclaradoYGenerarObligacion(Long declaracionId) {
+        Declaracion declaracion = declaracionRepository.findById(declaracionId)
+                .orElseThrow(DeclaracionNotFoundException::new);
+
+        declaracion.setEstado(DeclaracionEstado.DECLARADO);
+        Declaracion declaracionActualizada = declaracionRepository.save(declaracion);
+
+        // Crear la obligación
+        ObligacionRequest obligacionRequest = new ObligacionRequest();
+        obligacionRequest.setIdDeclaracion(declaracionActualizada.getId());
+        obligacionRequest.setIdCliente(declaracionActualizada.getCliente().getId());
+        obligacionRequest.setTipo("IGV + Renta");
+        obligacionRequest.setPeriodoTributario(declaracionActualizada.getPeriodoTributario());
+        obligacionRequest.setMonto(declaracionActualizada.getTotalPagarDeclaracion());
+        obligacionRequest.setFechaLimite(declaracionActualizada.getFechaLimite());
+        obligacionRequest.setEstado(EstadoObligacion.PENDIENTE);
+        obligacionRequest.setObservaciones("");
+
+        obligacionService.save(obligacionRequest);
+
+        return declaracionMapper.toDeclaracionResponse(declaracionActualizada);
+    }
+
+    @Override
+    public DeclaracionResponse marcarComoEnProceso(Long declaracionId) {
+        Declaracion declaracion = declaracionRepository.findById(declaracionId)
+                .orElseThrow(DeclaracionNotFoundException::new);
+
+        declaracion.setEstado(DeclaracionEstado.EN_PROCESO);
+        Declaracion declaracionActualizada = declaracionRepository.save(declaracion);
+
+        return declaracionMapper.toDeclaracionResponse(declaracionActualizada);
     }
 }

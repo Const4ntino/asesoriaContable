@@ -31,8 +31,8 @@ public class Obligacion {
     @Column(nullable = false, length = 100)
     private String tipo;
 
-    @Column(nullable = false)
-    private LocalDate periodo;
+    @Column(name = "periodo_tributario", nullable = false)
+    private LocalDate periodoTributario;
 
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal monto;

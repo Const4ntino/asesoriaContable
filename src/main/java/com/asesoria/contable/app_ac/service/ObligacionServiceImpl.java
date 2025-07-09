@@ -134,7 +134,7 @@ public class ObligacionServiceImpl implements ObligacionService {
         obligacion.setCliente(cliente);
         obligacion.setDeclaracion(declaracionMapper.toDeclaracion(declaracionRequest));
         obligacion.setTipo(declaracionRequest.getTipo());
-        obligacion.setPeriodo(declaracionRequest.getPeriodoTributario());
+        obligacion.setPeriodoTributario(declaracionRequest.getPeriodoTributario());
         obligacion.setMonto(declaracionRequest.getTotalPagarDeclaracion());
         obligacion.setFechaLimite(declaracionRequest.getFechaLimite());
         obligacion.setEstado(EstadoObligacion.PENDIENTE);

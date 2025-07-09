@@ -97,7 +97,7 @@ CREATE TABLE obligacion (
     id_declaracion BIGINT REFERENCES declaracion(id_declaracion) ON DELETE SET NULL,
     id_cliente BIGINT NOT NULL REFERENCES cliente(id_cliente) ON DELETE CASCADE,
     tipo VARCHAR(100) NOT NULL,
-    periodo DATE NOT NULL,
+    periodo_tributario DATE NOT NULL,
     monto DECIMAL(12, 2) NOT NULL,
     fecha_limite DATE,
     estado VARCHAR(30) DEFAULT 'PENDIENTE' CHECK (estado IN ('PENDIENTE', 'PAGADA', 'PAGADA_CON_RETRASO', 'VENCIDA', 'NO_DISPONIBLE')),

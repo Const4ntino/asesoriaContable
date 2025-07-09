@@ -41,4 +41,8 @@ public interface DeclaracionService {
             Integer periodoTributarioMes,
             BigDecimal totalPagarDeclaracion,
             DeclaracionEstado estado);
+
+    DeclaracionResponse marcarComoDeclaradoYGenerarObligacion(Long declaracionId);
+
+    DeclaracionResponse marcarComoEnProceso(Long declaracionId);
 }

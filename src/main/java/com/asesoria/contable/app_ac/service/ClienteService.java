@@ -1,5 +1,6 @@
 package com.asesoria.contable.app_ac.service;
 
+import com.asesoria.contable.app_ac.model.dto.ClienteMetricasParaContadorResponse;
 import com.asesoria.contable.app_ac.model.dto.ClienteRequest;
 import com.asesoria.contable.app_ac.model.dto.ClienteResponse;
 import com.asesoria.contable.app_ac.model.entity.Cliente;
@@ -23,4 +24,5 @@ public interface ClienteService {
     // Para devolver un cliente y no un cliente response
     Cliente findEntityByUsuarioId(Long usuarioId);
     MetricasDeclaracionResponse getMetricasDeclaracion(Long clienteId);
+    ClienteMetricasParaContadorResponse getIngresosEgresosMetricas(Long clienteId);
 }

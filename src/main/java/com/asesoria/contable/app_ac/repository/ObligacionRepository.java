@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -12,6 +13,14 @@ import org.springframework.data.repository.query.Param;
 public interface ObligacionRepository extends JpaRepository<Obligacion, Long> {
     List<Obligacion> findByClienteId(Long clienteId);
 
-    @Query("SELECT o FROM Obligacion o WHERE o.periodo = (SELECT MAX(o2.periodo) FROM Obligacion o2 WHERE o2.cliente.id = o.cliente.id AND o2.cliente.id IN :clienteIds) AND o.cliente.id IN :clienteIds")
+    @Query(value = """
+                SELECT * FROM obligacion o 
+                WHERE (o.cliente_id, o.periodo) IN (
+                    SELECT cliente_id, MAX(periodo)
+                    FROM obligacion
+                    WHERE cliente_id IN (:clienteIds)
+                    GROUP BY cliente_id
+                )
+            """, nativeQuery = true)
     List<Obligacion> findLatestObligacionesForClients(@Param("clienteIds") List<Long> clienteIds);
 }
