@@ -14,8 +14,7 @@ import java.util.Optional;
 public interface DeclaracionRepository extends JpaRepository<Declaracion, Long>, JpaSpecificationExecutor<Declaracion> {
     List<Declaracion> findByClienteId(Long clienteId);
 
-    Optional<Declaracion> findByClienteIdAndPeriodoTributarioAndEstado(Long clienteId, LocalDate periodoTributario, DeclaracionEstado estado);
-
+    Optional<Declaracion> findByClienteIdAndPeriodoTributario(Long clienteId, LocalDate periodoTributario);
     Optional<Declaracion> findFirstByClienteIdAndEstadoOrderByPeriodoTributarioAsc(Long clienteId, DeclaracionEstado estado);
 
     @Query("SELECT d FROM Declaracion d WHERE d.periodoTributario = (SELECT MAX(d2.periodoTributario) FROM Declaracion d2 WHERE d2.cliente.id = d.cliente.id AND d2.cliente.id IN :clienteIds) AND d.cliente.id IN :clienteIds")

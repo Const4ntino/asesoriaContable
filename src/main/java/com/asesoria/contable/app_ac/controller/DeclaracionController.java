@@ -104,7 +104,7 @@ public class DeclaracionController {
     }
 
     @PreAuthorize("hasRole('CLIENTE')")
-    @GetMapping("/mis-declaraciones/primera-creada")
+    @GetMapping("/mis-declaraciones/ultima")
     public ResponseEntity<DeclaracionResponse> getPrimeraDeclaracionCreada(@AuthenticationPrincipal Usuario usuario) {
         DeclaracionResponse declaracion = declaracionService.findFirstCreadaByUsuario(usuario);
         return ResponseEntity.ok(declaracion);
@@ -160,8 +160,10 @@ public class DeclaracionController {
 
     @PreAuthorize("hasRole('CONTADOR')")
     @PatchMapping("/{id}/marcar-declarado")
-    public ResponseEntity<DeclaracionResponse> marcarComoDeclaradoYGenerarObligacion(@PathVariable Long id) {
-        DeclaracionResponse declaracionActualizada = declaracionService.marcarComoDeclaradoYGenerarObligacion(id);
+    public ResponseEntity<DeclaracionResponse> marcarComoDeclaradoYGenerarObligacion(
+            @PathVariable Long id,
+            @RequestBody(required = false) String observaciones) {
+        DeclaracionResponse declaracionActualizada = declaracionService.marcarComoDeclaradoYGenerarObligacion(id, observaciones);
         return ResponseEntity.ok(declaracionActualizada);
     }
 

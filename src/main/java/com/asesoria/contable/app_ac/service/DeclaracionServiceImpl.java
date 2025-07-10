@@ -116,12 +116,11 @@ public class DeclaracionServiceImpl implements DeclaracionService {
         YearMonth periodo = YearMonth.now().minusMonths(1);
         LocalDate periodoTributario = periodo.atDay(1);
 
-        // Verificar si ya existe una declaración con estado CREADO
+        // Verificar si ya existe UNA declaración para ese cliente y periodo, sin importar el estado
         Optional<Declaracion> declaracionExistente =
-                declaracionRepository.findByClienteIdAndPeriodoTributarioAndEstado(
+                declaracionRepository.findByClienteIdAndPeriodoTributario(
                         cliente.getId(),
-                        periodoTributario,
-                        DeclaracionEstado.CREADO
+                        periodoTributario
                 );
 
         if (declaracionExistente.isPresent()) {
@@ -203,9 +202,13 @@ public class DeclaracionServiceImpl implements DeclaracionService {
     public DeclaracionResponse findFirstCreadaByUsuario(Usuario usuario) {
         Cliente cliente = clienteService.findEntityByUsuarioId(usuario.getId());
 
-        return declaracionRepository.findFirstByClienteIdAndEstadoOrderByPeriodoTributarioAsc(cliente.getId(), DeclaracionEstado.CREADO)
+        // Obtener el periodo tributario del mes anterior
+        YearMonth periodoAnterior = YearMonth.now().minusMonths(1);
+        LocalDate periodoTributario = periodoAnterior.atDay(1);
+
+        return declaracionRepository.findByClienteIdAndPeriodoTributario(cliente.getId(), periodoTributario)
                 .map(declaracionMapper::toDeclaracionResponse)
-                .orElseThrow(() -> new DeclaracionNotFoundException());
+                .orElseThrow(DeclaracionNotFoundException::new);
     }
 
     @Override
@@ -330,7 +333,7 @@ public class DeclaracionServiceImpl implements DeclaracionService {
     }
 
     @Override
-    public DeclaracionResponse marcarComoDeclaradoYGenerarObligacion(Long declaracionId) {
+    public DeclaracionResponse marcarComoDeclaradoYGenerarObligacion(Long declaracionId, String observaciones) {
         Declaracion declaracion = declaracionRepository.findById(declaracionId)
                 .orElseThrow(DeclaracionNotFoundException::new);
 
@@ -346,7 +349,9 @@ public class DeclaracionServiceImpl implements DeclaracionService {
         obligacionRequest.setMonto(declaracionActualizada.getTotalPagarDeclaracion());
         obligacionRequest.setFechaLimite(declaracionActualizada.getFechaLimite());
         obligacionRequest.setEstado(EstadoObligacion.PENDIENTE);
-        obligacionRequest.setObservaciones("");
+        if (observaciones != null) {
+            obligacionRequest.setObservaciones(observaciones);
+        }
 
         obligacionService.save(obligacionRequest);
 

@@ -15,11 +15,11 @@ public interface ObligacionRepository extends JpaRepository<Obligacion, Long> {
 
     @Query(value = """
                 SELECT * FROM obligacion o 
-                WHERE (o.cliente_id, o.periodo) IN (
-                    SELECT cliente_id, MAX(periodo)
+                WHERE (o.id_cliente, o.periodo) IN (
+                    SELECT id_cliente, MAX(periodo)
                     FROM obligacion
-                    WHERE cliente_id IN (:clienteIds)
-                    GROUP BY cliente_id
+                    WHERE id_cliente IN (:clienteIds)
+                    GROUP BY id_cliente
                 )
             """, nativeQuery = true)
     List<Obligacion> findLatestObligacionesForClients(@Param("clienteIds") List<Long> clienteIds);

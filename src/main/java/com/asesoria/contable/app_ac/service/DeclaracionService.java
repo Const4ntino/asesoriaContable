@@ -42,7 +42,7 @@ public interface DeclaracionService {
             BigDecimal totalPagarDeclaracion,
             DeclaracionEstado estado);
 
-    DeclaracionResponse marcarComoDeclaradoYGenerarObligacion(Long declaracionId);
+    DeclaracionResponse marcarComoDeclaradoYGenerarObligacion(Long declaracionId, String observaciones);
 
     DeclaracionResponse marcarComoEnProceso(Long declaracionId, String url, BigDecimal monto);
     DeclaracionResponse subirUrlConstanciaDeclaracion(Long declaracionId, String urlConstancia, String tipo);
