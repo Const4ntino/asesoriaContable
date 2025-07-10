@@ -146,16 +146,17 @@ public class DeclaracionController {
     }
 
     @PreAuthorize("hasRole('CONTADOR')")
+    @PatchMapping("/{id}/marcar-en-proceso")
+    public ResponseEntity<DeclaracionResponse> marcarComoEnProceso(@PathVariable Long id) {
+        DeclaracionResponse declaracionActualizada = declaracionService.marcarComoEnProceso(id);
+        return ResponseEntity.ok(declaracionActualizada);
+    }
+
+    @PreAuthorize("hasRole('CONTADOR')")
     @PatchMapping("/{id}/marcar-declarado")
     public ResponseEntity<DeclaracionResponse> marcarComoDeclaradoYGenerarObligacion(@PathVariable Long id) {
         DeclaracionResponse declaracionActualizada = declaracionService.marcarComoDeclaradoYGenerarObligacion(id);
         return ResponseEntity.ok(declaracionActualizada);
     }
 
-    @PreAuthorize("hasRole('CONTADOR')")
-    @PatchMapping("/{id}/marcar-en-proceso")
-    public ResponseEntity<DeclaracionResponse> marcarComoEnProceso(@PathVariable Long id) {
-        DeclaracionResponse declaracionActualizada = declaracionService.marcarComoEnProceso(id);
-        return ResponseEntity.ok(declaracionActualizada);
-    }
 }

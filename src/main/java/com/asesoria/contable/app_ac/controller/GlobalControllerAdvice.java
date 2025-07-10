@@ -1,10 +1,6 @@
 package com.asesoria.contable.app_ac.controller;
 
-import com.asesoria.contable.app_ac.exceptions.ClienteNotFoundException;
-import com.asesoria.contable.app_ac.exceptions.ContadorNotFoundException;
-import com.asesoria.contable.app_ac.exceptions.UsuarioNotFoundException;
-import com.asesoria.contable.app_ac.exceptions.IngresoNotFoundException;
-import com.asesoria.contable.app_ac.exceptions.EgresoNotFoundException;
+import com.asesoria.contable.app_ac.exceptions.*;
 import com.asesoria.contable.app_ac.model.ErrorResponse;
 import com.asesoria.contable.app_ac.utils.enums.ErrorCatalog;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -25,6 +21,28 @@ import static com.asesoria.contable.app_ac.utils.enums.ErrorCatalog.EGRESO_NOT_F
 
 @RestControllerAdvice
 public class GlobalControllerAdvice {
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(ObligacionNotFoundException.class)
+    public ErrorResponse handlerObligacionNotFoundException() {
+        return ErrorResponse.builder()
+                .codigo(OBLIGACION_NOT_FOUND.getCodigo())
+                .status(HttpStatus.NOT_FOUND)
+                .mensaje(OBLIGACION_NOT_FOUND.getMensaje())
+                .marcaDeTiempo(LocalDateTime.now())
+                .build();
+    }
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(DeclaracionNotFoundException.class)
+    public ErrorResponse handlerDeclaracionNotFoundException() {
+        return ErrorResponse.builder()
+                    .codigo(DECLARACION_NOT_FOUND.getCodigo())
+                .status(HttpStatus.NOT_FOUND)
+                .mensaje(DECLARACION_NOT_FOUND.getMensaje())
+                .marcaDeTiempo(LocalDateTime.now())
+                .build();
+    }
 
     // Errores específicos primero y luego los generales
     @ResponseStatus(HttpStatus.NOT_FOUND)
@@ -82,18 +100,6 @@ public class GlobalControllerAdvice {
                 .build();
     }
 
-
-//    @ResponseStatus(HttpStatus.NOT_FOUND)
-//    @ExceptionHandler(UsuarioNotFoundException.class)
-//    public ErrorResponse handlerUsuarioNotFoundException() {
-//        return ErrorResponse.builder()
-//                .codigo(USUARIO_NO_ENCONTRADO.getCodigo())
-//                .status(HttpStatus.NOT_FOUND)
-//                .mensaje(USUARIO_NO_ENCONTRADO.getMensaje())
-//                .marcaDeTiempo(LocalDateTime.now())
-//                .build();
-//    }
-
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ErrorResponse handlerMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
@@ -109,7 +115,16 @@ public class GlobalControllerAdvice {
             errorCatalago = CLIENTE_DATOS_INVALIDOS;
         } else if (nombreObjeto.toLowerCase().contains("usuario")) {
             errorCatalago = USUARIO_DATOS_INVALIDOS;
-        } else {
+        } else if (nombreObjeto.toLowerCase().contains("ingreso")) {
+            errorCatalago = INGRESO_DATOS_INVALIDOS;
+        } else if (nombreObjeto.toLowerCase().contains("egreso")) {
+            errorCatalago = EGRESO_DATOS_INVALIDOS;
+        } else if (nombreObjeto.toLowerCase().contains("declaracion")) {
+            errorCatalago = DECLARACION_DATOS_INVALIDOS;
+        } else if (nombreObjeto.toLowerCase().contains("obligacion")) {
+            errorCatalago = OBLIGACION_DATOS_INVALIDOS;
+        }
+        else {
             errorCatalago = ERROR_GENERICO;
         }
 
