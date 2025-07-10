@@ -6,6 +6,7 @@ import com.asesoria.contable.app_ac.model.dto.ObligacionResponse;
 import com.asesoria.contable.app_ac.service.ObligacionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -13,6 +14,7 @@ import com.asesoria.contable.app_ac.model.entity.Usuario;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -72,10 +74,17 @@ public class ObligacionController {
     }
 
     @PreAuthorize("hasRole('CONTADOR')")
-    @GetMapping("/mis-clientes/ultimas-obligaciones")
-    public ResponseEntity<List<ObligacionResponse>> getLatestObligacionesForMyClients(@AuthenticationPrincipal Usuario usuario) {
-        List<ObligacionResponse> obligaciones = obligacionService.getLatestObligacionesForMyClients(usuario);
-        return ResponseEntity.ok(obligaciones);
+    @GetMapping("/mis-clientes/obligaciones")
+    public ResponseEntity<List<ObligacionResponse>> filtrarObligaciones(
+            @AuthenticationPrincipal Usuario usuario,
+            @RequestParam(required = false) String estado,
+            @RequestParam(required = false) String nombreCliente,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta,
+            @RequestParam(defaultValue = "DESC") String orden
+    ) {
+        List<ObligacionResponse> lista = obligacionService.buscarObligaciones(usuario, estado, nombreCliente, desde, hasta, orden);
+        return ResponseEntity.ok(lista);
     }
 
     @PreAuthorize("hasRole('CLIENTE')")

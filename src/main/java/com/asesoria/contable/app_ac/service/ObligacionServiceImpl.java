@@ -17,9 +17,13 @@ import com.asesoria.contable.app_ac.utils.enums.EstadoObligacion;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -105,24 +109,58 @@ public class ObligacionServiceImpl implements ObligacionService {
     }
 
     @Override
-    public List<ObligacionResponse> getLatestObligacionesForMyClients(Usuario usuario) {
+    public List<ObligacionResponse> buscarObligaciones(
+            Usuario usuario,
+            String estado,
+            String nombreCliente,
+            LocalDate desde,
+            LocalDate hasta,
+            String orden
+    ) {
         Contador contador = contadorRepository.findByUsuarioId(usuario.getId())
-                .orElseThrow(() -> new RuntimeException("Contador no encontrado para el usuario."));
+                .orElseThrow(() -> new RuntimeException("Contador no encontrado."));
 
         List<Cliente> clientes = clienteRepository.findAllByContadorId(contador.getId());
-        List<Long> clienteIds = clientes.stream()
-                .map(Cliente::getId)
-                .collect(Collectors.toList());
 
-        if (clienteIds.isEmpty()) {
-            return new ArrayList<>();
+        if (nombreCliente != null && !nombreCliente.isBlank()) {
+            String filtro = nombreCliente.trim().toLowerCase();
+            clientes = clientes.stream()
+                    .filter(c -> c.getNombres().toLowerCase().contains(filtro))
+                    .toList();
         }
 
-        List<Obligacion> latestObligaciones = obligacionRepository.findLatestObligacionesForClients(clienteIds);
+        List<Long> clienteIds = clientes.stream()
+                .map(Cliente::getId)
+                .toList();
 
-        return latestObligaciones.stream()
+        if (clienteIds.isEmpty()) return List.of();
+
+        List<Obligacion> lista = obligacionRepository.findUltimaPorCliente(clienteIds);
+
+        // ✅ Aplicar filtros en Java
+        Stream<Obligacion> stream = lista.stream();
+
+        if (estado != null && !estado.isBlank()) {
+            stream = stream.filter(o -> o.getEstado() != null && o.getEstado().name().equalsIgnoreCase(estado));
+        }
+
+        if (desde != null) {
+            stream = stream.filter(o -> !o.getPeriodoTributario().isBefore(desde));
+        }
+
+        if (hasta != null) {
+            stream = stream.filter(o -> !o.getPeriodoTributario().isAfter(hasta));
+        }
+
+        if ("ASC".equalsIgnoreCase(orden)) {
+            stream = stream.sorted(Comparator.comparing(Obligacion::getPeriodoTributario));
+        } else {
+            stream = stream.sorted(Comparator.comparing(Obligacion::getPeriodoTributario).reversed());
+        }
+
+        return stream
                 .map(obligacionMapper::convertToResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override

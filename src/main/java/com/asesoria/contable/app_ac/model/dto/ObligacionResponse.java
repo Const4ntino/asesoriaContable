@@ -18,7 +18,7 @@ public class ObligacionResponse {
 
     private String tipo;
 
-    private LocalDate periodo;
+    private LocalDate periodoTributario;
 
     private BigDecimal monto;
 
