@@ -24,7 +24,11 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
@@ -130,7 +134,7 @@ public class DeclaracionServiceImpl implements DeclaracionService {
         Declaracion nuevaDeclaracion = new Declaracion();
         nuevaDeclaracion.setCliente(cliente);
         nuevaDeclaracion.setPeriodoTributario(periodoTributario);
-        nuevaDeclaracion.setTipo("IGV");
+        nuevaDeclaracion.setTipo("IGV +Renta");
         nuevaDeclaracion.setFechaLimite(fechaLimite);
         nuevaDeclaracion.setEstadoCliente(EstadoCliente.PENDIENTE);
         nuevaDeclaracion.setEstadoContador(EstadoContador.PENDIENTE);
@@ -372,9 +376,11 @@ public class DeclaracionServiceImpl implements DeclaracionService {
                 .orElseThrow(DeclaracionNotFoundException::new);
 
         if (urlConstancia != null && !urlConstancia.isBlank()) {
-            if (tipo == "DECLARACION") {
+            if ("DECLARACION".equals(tipo)) {
+                eliminarArchivoAnterior(declaracion.getUrlConstanciaDeclaracion());
                 declaracion.setUrlConstanciaDeclaracion(urlConstancia);
-            } else if (tipo == "SUNAT") {
+            } else if ("SUNAT".equals(tipo)) {
+                eliminarArchivoAnterior(declaracion.getUrlConstanciaSunat());
                 declaracion.setUrlConstanciaSunat(urlConstancia);
             } else {
                 System.out.println("Tipo incorrecto");
@@ -383,5 +389,23 @@ public class DeclaracionServiceImpl implements DeclaracionService {
 
         Declaracion declaracionActualizada = declaracionRepository.save(declaracion);
         return declaracionMapper.toDeclaracionResponse(declaracionActualizada);
+    }
+
+    private void eliminarArchivoAnterior(String urlRelativa) {
+        if (urlRelativa == null || urlRelativa.isBlank()) return;
+
+        // Quita el prefijo inicial si lo tiene, para convertirlo en ruta real
+        String rutaRelativa = urlRelativa.startsWith("/") ? urlRelativa.substring(1) : urlRelativa;
+
+        // Ruta absoluta del archivo en el servidor
+        Path rutaAbsoluta = Paths.get(System.getProperty("user.dir"), rutaRelativa);
+
+        try {
+            Files.deleteIfExists(rutaAbsoluta);
+            System.out.println("Archivo anterior eliminado: " + rutaAbsoluta.toString());
+        } catch (IOException e) {
+            System.err.println("No se pudo eliminar el archivo anterior: " + rutaAbsoluta);
+            e.printStackTrace();
+        }
     }
 }
