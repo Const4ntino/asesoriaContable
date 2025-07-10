@@ -6,8 +6,9 @@ import com.asesoria.contable.app_ac.model.entity.Declaracion;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface DeclaracionMapper {
 
     //@Mapping(source = "cliente.id", target = "idCliente")

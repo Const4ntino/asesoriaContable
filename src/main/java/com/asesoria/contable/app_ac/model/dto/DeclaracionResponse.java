@@ -19,7 +19,7 @@ public class DeclaracionResponse {
     private EstadoContador estadoContador;
     private LocalDate fechaLimite;
     private String urlConstanciaDeclaracion;
-    private String urlConstanciaPago;
+    private String urlConstanciaSunat;
     private BigDecimal totalIngresos;
     private BigDecimal totalEgresos;
     private BigDecimal utilidadEstimada;

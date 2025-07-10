@@ -48,8 +48,8 @@ public class Declaracion {
     @Column(name = "url_constancia_declaracion")
     private String urlConstanciaDeclaracion;
 
-    @Column(name = "url_constancia_pago")
-    private String urlConstanciaPago;
+    @Column(name = "url_constancia_sunat")
+    private String urlConstanciaSunat;
 
     @Column(name = "total_ingresos")
     private BigDecimal totalIngresos;

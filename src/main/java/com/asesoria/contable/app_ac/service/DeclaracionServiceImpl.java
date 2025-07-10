@@ -24,6 +24,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
@@ -349,13 +350,38 @@ public class DeclaracionServiceImpl implements DeclaracionService {
     }
 
     @Override
-    public DeclaracionResponse marcarComoEnProceso(Long declaracionId) {
+    public DeclaracionResponse marcarComoEnProceso(Long declaracionId, String url, BigDecimal monto) {
         Declaracion declaracion = declaracionRepository.findById(declaracionId)
                 .orElseThrow(DeclaracionNotFoundException::new);
 
         declaracion.setEstado(DeclaracionEstado.EN_PROCESO);
+        declaracion.setTotalPagarDeclaracion(monto);
+        declaracion.setTotalPagarDeclaracion(declaracion.getTotalPagarDeclaracion());
+        if (url != null && !url.isBlank()) {
+            declaracion.setUrlConstanciaDeclaracion(url);
+        }
+
         Declaracion declaracionActualizada = declaracionRepository.save(declaracion);
 
+        return declaracionMapper.toDeclaracionResponse(declaracionActualizada);
+    }
+
+    @Override
+    public DeclaracionResponse subirUrlConstanciaDeclaracion(Long declaracionId, String urlConstancia, String tipo) {
+        Declaracion declaracion = declaracionRepository.findById(declaracionId)
+                .orElseThrow(DeclaracionNotFoundException::new);
+
+        if (urlConstancia != null && !urlConstancia.isBlank()) {
+            if (tipo == "DECLARACION") {
+                declaracion.setUrlConstanciaDeclaracion(urlConstancia);
+            } else if (tipo == "SUNAT") {
+                declaracion.setUrlConstanciaSunat(urlConstancia);
+            } else {
+                System.out.println("Tipo incorrecto");
+            }
+        }
+
+        Declaracion declaracionActualizada = declaracionRepository.save(declaracion);
         return declaracionMapper.toDeclaracionResponse(declaracionActualizada);
     }
 }

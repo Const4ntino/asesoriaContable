@@ -1,5 +1,6 @@
 package com.asesoria.contable.app_ac.controller;
 
+import com.asesoria.contable.app_ac.model.dto.DeclaracionCambiarEstadoRequest;
 import com.asesoria.contable.app_ac.model.dto.DeclaracionRequest;
 import com.asesoria.contable.app_ac.model.dto.DeclaracionResponse;
 import com.asesoria.contable.app_ac.model.dto.PeriodoVencimientoResponse;
@@ -147,8 +148,13 @@ public class DeclaracionController {
 
     @PreAuthorize("hasRole('CONTADOR')")
     @PatchMapping("/{id}/marcar-en-proceso")
-    public ResponseEntity<DeclaracionResponse> marcarComoEnProceso(@PathVariable Long id) {
-        DeclaracionResponse declaracionActualizada = declaracionService.marcarComoEnProceso(id);
+    public ResponseEntity<DeclaracionResponse> marcarComoEnProceso(
+            @PathVariable Long id,
+            @RequestBody(required = false) DeclaracionCambiarEstadoRequest request) {
+
+        String url = request != null ? request.getUrlConstancia() : null;
+
+        DeclaracionResponse declaracionActualizada = declaracionService.marcarComoEnProceso(id, url, request.getMonto());
         return ResponseEntity.ok(declaracionActualizada);
     }
 
@@ -156,6 +162,16 @@ public class DeclaracionController {
     @PatchMapping("/{id}/marcar-declarado")
     public ResponseEntity<DeclaracionResponse> marcarComoDeclaradoYGenerarObligacion(@PathVariable Long id) {
         DeclaracionResponse declaracionActualizada = declaracionService.marcarComoDeclaradoYGenerarObligacion(id);
+        return ResponseEntity.ok(declaracionActualizada);
+    }
+
+    @PreAuthorize("hasRole('CONTADOR')")
+    @PatchMapping("/{id}/subir-comprobante-declaracion")
+    public ResponseEntity<DeclaracionResponse> subirUrlConstanciaDeclaracion(
+            @PathVariable Long id,
+            @RequestParam(required = true) String urlConstancia,
+            @RequestParam(required = true) String tipo) {
+        DeclaracionResponse declaracionActualizada = declaracionService.subirUrlConstanciaDeclaracion(id, urlConstancia, tipo);
         return ResponseEntity.ok(declaracionActualizada);
     }
 
