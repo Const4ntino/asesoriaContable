@@ -1,9 +1,10 @@
 package com.asesoria.contable.app_ac.controller;
 
-import com.asesoria.contable.app_ac.model.dto.DeclaracionRequest;
-import com.asesoria.contable.app_ac.model.dto.ObligacionRequest;
-import com.asesoria.contable.app_ac.model.dto.ObligacionResponse;
+import com.asesoria.contable.app_ac.model.dto.*;
 import com.asesoria.contable.app_ac.service.ObligacionService;
+import com.asesoria.contable.app_ac.service.PagoService;
+import com.asesoria.contable.app_ac.utils.enums.EstadoPago;
+import com.asesoria.contable.app_ac.utils.enums.PagadoPor;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -23,6 +24,7 @@ import java.util.List;
 public class ObligacionController {
 
     private final ObligacionService obligacionService;
+    private final PagoService pagoService;
 
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     @GetMapping("/{id}")
@@ -89,8 +91,30 @@ public class ObligacionController {
 
     @PreAuthorize("hasRole('CLIENTE')")
     @GetMapping("/mis-obligaciones")
-    public ResponseEntity<List<ObligacionResponse>> getMisObligaciones(@AuthenticationPrincipal Usuario usuario) {
-        List<ObligacionResponse> obligaciones = obligacionService.buscarMisObligaciones(usuario);
+    public ResponseEntity<List<ObligacionResponse>> getMisObligaciones(
+            @AuthenticationPrincipal Usuario usuario,
+            @RequestParam(required = false) Integer mes,
+            @RequestParam(required = false) Integer anio,
+            @RequestParam(required = false) java.math.BigDecimal montoMaximo,
+            @RequestParam(defaultValue = "DESC") String ordenFechaLimite
+    ) {
+        List<ObligacionResponse> obligaciones = obligacionService.buscarMisObligaciones(usuario, mes, anio, montoMaximo, ordenFechaLimite);
         return ResponseEntity.ok(obligaciones);
     }
+
+    @PreAuthorize("hasRole('CLIENTE')")
+    @PostMapping("/{idObligacion}/pagos/cliente")
+    public ResponseEntity<PagoResponse> registrarPagoCliente(@PathVariable Long idObligacion, @Valid @RequestBody PagoClienteRequest pagoRequest) {
+        PagoResponse pagoResponse = pagoService.registrarPagoCliente(idObligacion, pagoRequest);
+        return new ResponseEntity<>(pagoResponse, HttpStatus.CREATED);
+    }
+
+    @PreAuthorize("hasRole('CONTADOR')")
+    @PostMapping("/{idObligacion}/pagos/contador")
+    public ResponseEntity<PagoResponse> registrarPagoContador(@PathVariable Long idObligacion, @Valid @RequestBody PagoContadorRequest pagoRequest) {
+        PagoResponse pagoResponse = pagoService.registrarPagoContador(idObligacion, pagoRequest);
+        return new ResponseEntity<>(pagoResponse, HttpStatus.CREATED);
+    }
+
+
 }

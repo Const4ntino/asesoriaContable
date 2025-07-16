@@ -7,10 +7,9 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = ObligacionMapper.class)
 public interface PagoMapper {
 
-    @Mapping(source = "obligacion.id", target = "idObligacion")
     PagoResponse toPagoResponse(Pago pago);
 
     @Mapping(target = "obligacion", ignore = true)

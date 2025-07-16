@@ -33,5 +33,11 @@ public interface ObligacionService {
             String orden
     );
 
-    List<ObligacionResponse> buscarMisObligaciones(Usuario usuario);
+    List<ObligacionResponse> buscarMisObligaciones(
+            Usuario usuario,
+            Integer mes,
+            Integer anio,
+            java.math.BigDecimal montoMaximo,
+            String ordenFechaLimite
+    );
 }

@@ -396,7 +396,7 @@ public class DeclaracionServiceImpl implements DeclaracionService {
         return declaracionMapper.toDeclaracionResponse(declaracionActualizada);
     }
 
-    private void eliminarArchivoAnterior(String urlRelativa) {
+    public static void eliminarArchivoAnterior(String urlRelativa) {
         if (urlRelativa == null || urlRelativa.isBlank()) return;
 
         // Quita el prefijo inicial si lo tiene, para convertirlo en ruta real

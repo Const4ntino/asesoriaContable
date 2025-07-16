@@ -181,9 +181,36 @@ public class ObligacionServiceImpl implements ObligacionService {
     }
 
     @Override
-    public List<ObligacionResponse> buscarMisObligaciones(Usuario usuario) {
+    public List<ObligacionResponse> buscarMisObligaciones(
+            Usuario usuario,
+            Integer mes,
+            Integer anio,
+            java.math.BigDecimal montoMaximo,
+            String ordenFechaLimite
+    ) {
         Cliente cliente = clienteService.findEntityByUsuarioId(usuario.getId());
-        return obligacionRepository.findByClienteId(cliente.getId()).stream()
+        List<Obligacion> obligaciones = obligacionRepository.findByClienteId(cliente.getId());
+
+        Stream<Obligacion> stream = obligaciones.stream();
+
+        if (mes != null) {
+            stream = stream.filter(o -> o.getPeriodoTributario().getMonthValue() == mes);
+        }
+
+        if (anio != null) {
+            stream = stream.filter(o -> o.getPeriodoTributario().getYear() == anio);
+        }
+
+        if (montoMaximo != null) {
+            stream = stream.filter(o -> o.getMonto().compareTo(montoMaximo) <= 0);
+        }
+
+        Comparator<Obligacion> comparator = Comparator.comparing(Obligacion::getFechaLimite);
+        if ("DESC".equalsIgnoreCase(ordenFechaLimite)) {
+            comparator = comparator.reversed();
+        }
+
+        return stream.sorted(comparator)
                 .map(obligacionMapper::convertToResponse)
                 .collect(Collectors.toList());
     }
