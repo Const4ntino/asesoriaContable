@@ -4,6 +4,7 @@ import com.asesoria.contable.app_ac.model.dto.ClienteMetricasParaContadorRespons
 import com.asesoria.contable.app_ac.model.dto.ClienteRequest;
 import com.asesoria.contable.app_ac.model.dto.ClienteResponse;
 import com.asesoria.contable.app_ac.model.dto.MetricasDeclaracionResponse;
+import com.asesoria.contable.app_ac.model.entity.Cliente;
 import com.asesoria.contable.app_ac.model.entity.Usuario;
 import com.asesoria.contable.app_ac.service.ClienteService;
 import jakarta.validation.Valid;
@@ -12,6 +13,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
 
 import java.net.URI;
 import java.util.List;
@@ -113,5 +118,25 @@ public class ClienteController {
     public ResponseEntity<ClienteMetricasParaContadorResponse> getIngresosEgresosMetricas(@RequestParam Long clienteId) {
         ClienteMetricasParaContadorResponse metricas = clienteService.getIngresosEgresosMetricas(clienteId);
         return ResponseEntity.ok(metricas);
+    }
+
+    @PreAuthorize("hasRole('CLIENTE')")
+    @GetMapping("/ingresos/suma")
+    public ResponseEntity<BigDecimal> getSumaIngresosCliente(
+            @AuthenticationPrincipal Usuario usuario,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate periodo) {
+        Cliente cliente = clienteService.findEntityByUsuarioId(usuario.getId());
+        BigDecimal sumaIngresos = clienteService.sumIngresosByClienteIdAndPeriodo(cliente.getId(), periodo);
+        return ResponseEntity.ok(sumaIngresos);
+    }
+
+    @PreAuthorize("hasRole('CLIENTE')")
+    @GetMapping("/egresos/suma")
+    public ResponseEntity<BigDecimal> getSumaEgresosCliente(
+            @AuthenticationPrincipal Usuario usuario,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate periodo) {
+        Cliente cliente = clienteService.findEntityByUsuarioId(usuario.getId());
+        BigDecimal sumaEgresos = clienteService.sumEgresosByClienteIdAndPeriodo(cliente.getId(), periodo);
+        return ResponseEntity.ok(sumaEgresos);
     }
 }

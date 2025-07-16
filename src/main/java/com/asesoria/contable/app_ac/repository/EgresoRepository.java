@@ -32,4 +32,7 @@ public interface EgresoRepository extends JpaRepository<Egreso, Long> {
 
     @Query("SELECT COALESCE(SUM(e.montoIgv), 0) FROM Egreso e WHERE e.cliente.id = :clienteId AND e.fecha BETWEEN :startDate AND :endDate")
     BigDecimal sumMontoIgvByClienteIdAndFechaBetween(@Param("clienteId") Long clienteId, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
+    @Query("SELECT COALESCE(SUM(e.monto), 0) FROM Egreso e WHERE e.cliente.id = :clienteId AND FUNCTION('DATE_TRUNC', 'month', e.fecha) = FUNCTION('DATE_TRUNC', 'month', :periodo)")
+    BigDecimal sumMontoByClienteIdAndPeriodo(@Param("clienteId") Long clienteId, @Param("periodo") LocalDate periodo);
 }

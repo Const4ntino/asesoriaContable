@@ -5,6 +5,8 @@ import com.asesoria.contable.app_ac.model.dto.ClienteRequest;
 import com.asesoria.contable.app_ac.model.dto.ClienteResponse;
 import com.asesoria.contable.app_ac.model.entity.Cliente;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 import com.asesoria.contable.app_ac.model.dto.MetricasDeclaracionResponse;
@@ -25,4 +27,6 @@ public interface ClienteService {
     Cliente findEntityByUsuarioId(Long usuarioId);
     MetricasDeclaracionResponse getMetricasDeclaracion(Long clienteId);
     ClienteMetricasParaContadorResponse getIngresosEgresosMetricas(Long clienteId);
+    BigDecimal sumIngresosByClienteIdAndPeriodo(Long clienteId, LocalDate periodo);
+    BigDecimal sumEgresosByClienteIdAndPeriodo(Long clienteId, LocalDate periodo);
 }

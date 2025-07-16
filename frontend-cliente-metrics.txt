@@ -1,0 +1,39 @@
+# Guía para el Frontend: Métricas de Ingresos y Egresos del Cliente
+
+Este documento detalla cómo el frontend puede consumir los endpoints para obtener la suma de ingresos y egresos del cliente autenticado, con la opción de filtrar por periodo.
+
+## 1. Endpoints del API
+
+### 1.1. Suma de Ingresos del Cliente
+
+Este endpoint devuelve la suma total de los ingresos del cliente autenticado. Opcionalmente, se puede filtrar por un periodo tributario específico.
+
+*   **Método:** `GET`
+*   **URL:** `/api/clientes/ingresos/suma`
+*   **Parámetros de Consulta (Opcionales para Filtrado):**
+    *   `periodo`: `String` en formato `YYYY-MM-DD`. Para filtrar por un mes y año específicos (ej. "2024-06-01" para Junio 2024). Se recomienda enviar el primer día del mes del periodo deseado.
+*   **Respuesta:** `BigDecimal` (un número decimal que representa la suma total de ingresos).
+*   **Ejemplos:**
+    *   `GET /api/clientes/ingresos/suma` (Suma total de ingresos del cliente autenticado sin filtro de periodo)
+    *   `GET /api/clientes/ingresos/suma?periodo=2024-06-01` (Suma de ingresos del cliente autenticado para Junio 2024)
+
+### 1.2. Suma de Egresos del Cliente
+
+Este endpoint devuelve la suma total de los egresos del cliente autenticado. Opcionalmente, se puede filtrar por un periodo tributario específico.
+
+*   **Método:** `GET`
+*   **URL:** `/api/clientes/egresos/suma`
+*   **Parámetros de Consulta (Opcionales para Filtrado):**
+    *   `periodo`: `String` en formato `YYYY-MM-DD`. Para filtrar por un mes y año específicos (ej. "2024-06-01" para Junio 2024). Se recomienda enviar el primer día del mes del periodo deseado.
+*   **Respuesta:** `BigDecimal` (un número decimal que representa la suma total de egresos).
+*   **Ejemplos:**
+    *   `GET /api/clientes/egresos/suma` (Suma total de egresos del cliente autenticado sin filtro de periodo)
+    *   `GET /api/clientes/egresos/suma?periodo=2024-06-01` (Suma de egresos del cliente autenticado para Junio 2024)
+
+## 2. Consideraciones para el Frontend
+
+*   **Autenticación:** Ambos endpoints asumen que el cliente ya está autenticado. El ID del cliente se obtiene automáticamente del token JWT de la sesión. Por lo tanto, no necesitas enviar el `idCliente` como parámetro de ruta o de consulta.
+*   **Manejo de Periodo:** Si el usuario selecciona un mes y año para filtrar, asegúrate de formatear la fecha como `YYYY-MM-DD` y enviar el primer día de ese mes (ej., para Junio 2024, envía "2024-06-01"). Si no se especifica un periodo, el backend devolverá la suma total de ingresos/egresos de todos los tiempos.
+*   **Tipo de Dato de Respuesta:** La respuesta será un valor numérico (BigDecimal), que deberás manejar adecuadamente en tu frontend (ej., parsear a un número flotante si tu lenguaje lo requiere y formatear para visualización).
+*   **Manejo de Errores:** Prepárate para manejar posibles errores, como problemas de autenticación o errores internos del servidor.
+*   **Roles:** Estos endpoints están protegidos y solo son accesibles para usuarios con el rol `CLIENTE`. Asegúrate de que el token JWT se envíe en las cabeceras de autorización.

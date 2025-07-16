@@ -14,6 +14,8 @@ import com.asesoria.contable.app_ac.utils.enums.Regimen;
 import com.asesoria.contable.app_ac.utils.enums.TipoCliente;
 import com.asesoria.contable.app_ac.repository.ClienteRepository;
 import com.asesoria.contable.app_ac.repository.ContadorRepository;
+import com.asesoria.contable.app_ac.repository.EgresoRepository;
+import com.asesoria.contable.app_ac.repository.IngresoRepository;
 import com.asesoria.contable.app_ac.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.time.YearMonth;
 import com.asesoria.contable.app_ac.model.dto.ClienteMetricasParaContadorResponse;
@@ -40,6 +43,8 @@ public class ClienteServiceImpl implements ClienteService {
     private final ClienteMapper clienteMapper;
     private final IngresoService ingresoService;
     private final EgresoService egresoService;
+    private final IngresoRepository ingresoRepository;
+    private final EgresoRepository egresoRepository;
 
     @Override
     public ClienteResponse findById(Long id) {
@@ -335,5 +340,15 @@ public class ClienteServiceImpl implements ClienteService {
                 .egresosMesAnterior(egresosMesAnterior)
                 .utilidadMesAnterior(utilidadMesAnterior)
                 .build();
+    }
+
+    @Override
+    public BigDecimal sumIngresosByClienteIdAndPeriodo(Long clienteId, LocalDate periodo) {
+        return ingresoRepository.sumMontoByClienteIdAndPeriodo(clienteId, periodo);
+    }
+
+    @Override
+    public BigDecimal sumEgresosByClienteIdAndPeriodo(Long clienteId, LocalDate periodo) {
+        return egresoRepository.sumMontoByClienteIdAndPeriodo(clienteId, periodo);
     }
 }
