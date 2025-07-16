@@ -16,4 +16,6 @@ public interface PagoNrusService {
     PagoNrusResponse update(Long id, PagoNrusRequest pagoNrusRequest);
 
     void delete(Long id);
+
+    PagoNrusResponse registrarPago(Long idObligacionNrus, PagoNrusRequest pagoNrusRequest);
 }

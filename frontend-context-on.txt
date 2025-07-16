@@ -1,0 +1,163 @@
+# Guía para el Frontend: Módulo de Obligaciones NRUS
+
+Este documento detalla cómo el frontend puede interactuar con los nuevos endpoints del backend para el módulo de Obligaciones NRUS y Pagos NRUS.
+
+## 1. Estructuras de Datos (JSON)
+
+### ObligacionNrusRequest
+Utilizado para crear o actualizar una obligación NRUS.
+
+```json
+{
+  "idCliente": 0, 
+  "periodoTributario": "YYYY-MM-DD", 
+  "tipo": "CUOTA MENSUAL", 
+  "monto": 0.00, 
+  "fechaLimite": "YYYY-MM-DD", 
+  "estado": "PENDIENTE", 
+  "observaciones": ""
+}
+```
+*   **idCliente**: ID del cliente al que pertenece la obligación (tipo `Long` en backend).
+*   **periodoTributario**: Fecha del periodo tributario (ej. "2024-07-01" para Julio 2024). Se recomienda enviar el primer día del mes del periodo deseado (tipo `LocalDate` en backend).
+*   **tipo**: Siempre "CUOTA MENSUAL" para NRUS (tipo `String` en backend).
+*   **monto**: Monto de la obligación (tipo `BigDecimal` en backend).
+*   **fechaLimite**: Fecha límite de pago (tipo `LocalDate` en backend).
+*   **estado**: Estado de la obligación. Posibles valores: "PENDIENTE", "POR_CONFIRMAR", "PAGADA", "PAGADA_CON_RETRASO", "VENCIDA", "NO_DISPONIBLE" (tipo `EstadoObligacion` enum en backend).
+*   **observaciones**: Observaciones adicionales (tipo `String` en backend).
+
+### ObligacionNrusResponse
+Representa una obligación NRUS devuelta por el backend.
+
+```json
+{
+  "id": 0,
+  "idCliente": 0,
+  "periodoTributario": "YYYY-MM-DD",
+  "tipo": "CUOTA MENSUAL",
+  "monto": 0.00,
+  "fechaLimite": "YYYY-MM-DD",
+  "estado": "PENDIENTE",
+  "observaciones": ""
+}
+```
+*   **id**: ID de la obligación (tipo `Long` en backend).
+*   **idCliente**: ID del cliente al que pertenece la obligación (tipo `Long` en backend).
+*   **periodoTributario**: Fecha del periodo tributario (ej. "2024-07-01" para Julio 2024) (tipo `LocalDate` en backend).
+*   **tipo**: Siempre "CUOTA MENSUAL" para NRUS (tipo `String` en backend).
+*   **monto**: Monto de la obligación (tipo `BigDecimal` en backend).
+*   **fechaLimite**: Fecha límite de pago (tipo `LocalDate` en backend).
+*   **estado**: Estado de la obligación. Posibles valores: "PENDIENTE", "POR_CONFIRMAR", "PAGADA", "PAGADA_CON_RETRASO", "VENCIDA", "NO_DISPONIBLE" (tipo `EstadoObligacion` enum en backend).
+*   **observaciones**: Observaciones adicionales (tipo `String` en backend).
+
+### PagoNrusRequest
+Utilizado para registrar un pago de una obligación NRUS.
+
+```json
+{
+  "idObligacionNrus": 0,
+  "montoPagado": 0.00,
+  "fechaPago": "YYYY-MM-DD",
+  "medioPago": "TRANSFERENCIA",
+  "urlComprobante": "",
+  "estado": "CUMPLIDO",
+  "pagadoPor": "CLIENTE",
+  "comentarioContador": ""
+}
+```
+*   **idObligacionNrus**: ID de la obligación NRUS a la que se asocia el pago (tipo `Long` en backend).
+*   **montoPagado**: Monto pagado (tipo `BigDecimal` en backend).
+*   **fechaPago**: Fecha en que se realizó el pago (tipo `LocalDate` en backend).
+*   **medioPago**: Medio de pago. Posibles valores: "TRANSFERENCIA", "INTERBANK", "BCP", "YAPE", "NPS", "BANCO", "APP" (tipo `MedioPago` enum en backend).
+*   **urlComprobante**: URL del comprobante de pago (si aplica) (tipo `String` en backend).
+*   **estado**: Estado del pago. Posibles valores: "CUMPLIDO", "ATRASADO" (tipo `EstadoPagoNrus` enum en backend).
+*   **pagadoPor**: Quién realizó el pago. Posibles valores: "CLIENTE", "CONTADOR" (tipo `PagadoPor` enum en backend).
+*   **comentarioContador**: Comentario opcional del contador (tipo `String` en backend).
+
+### PagoNrusResponse
+Representa un pago NRUS devuelto por el backend.
+
+```json
+{
+  "id": 0,
+  "idObligacionNrus": 0,
+  "montoPagado": 0.00,
+  "fechaPago": "YYYY-MM-DD",
+  "medioPago": "TRANSFERENCIA",
+  "urlComprobante": "",
+  "estado": "CUMPLIDO",
+  "pagadoPor": "CLIENTE",
+  "comentarioContador": ""
+}
+```
+*   **id**: ID del pago (tipo `Long` en backend).
+*   **idObligacionNrus**: ID de la obligación NRUS a la que se asocia el pago (tipo `Long` en backend).
+*   **montoPagado**: Monto pagado (tipo `BigDecimal` en backend).
+*   **fechaPago**: Fecha en que se realizó el pago (tipo `LocalDate` en backend).
+*   **medioPago**: Medio de pago. Posibles valores: "TRANSFERENCIA", "INTERBANK", "BCP", "YAPE", "NPS", "BANCO", "APP" (tipo `MedioPago` enum en backend).
+*   **urlComprobante**: URL del comprobante de pago (si aplica) (tipo `String` en backend).
+*   **estado**: Estado del pago. Posibles valores: "CUMPLIDO", "ATRASADO" (tipo `EstadoPagoNrus` enum en backend).
+*   **pagadoPor**: Quién realizó el pago. Posibles valores: "CLIENTE", "CONTADOR" (tipo `PagadoPor` enum en backend).
+*   **comentarioContador**: Comentario opcional del contador (tipo `String` en backend).
+
+## 2. Endpoints del API
+
+### 2.1. Generar o Actualizar Obligación NRUS (Automático)
+
+Este endpoint es crucial para asegurar que siempre exista una obligación NRUS para el periodo actual del cliente, y que su monto se calcule automáticamente en base a sus ingresos.
+
+*   **Método:** `POST`
+*   **URL:** `/api/v1/obligaciones-nrus/generar-o-actualizar`
+*   **Parámetros de Consulta:**
+    *   `idCliente`: `Long` (ID del cliente)
+    *   `periodoTributario`: `String` en formato `YYYY-MM-DD` (ej. "2024-07-01" para Julio 2024). Se recomienda enviar el primer día del mes del periodo deseado.
+*   **Uso:** Se debe llamar a este endpoint cuando el cliente NRUS inicie sesión o acceda al módulo de "Pagos y Obligaciones". Esto garantiza que la obligación para el mes en curso esté siempre actualizada.
+
+### 2.2. Listar Obligaciones NRUS de un Cliente
+
+Permite obtener todas las obligaciones de un cliente, con opciones de filtrado.
+
+*   **Método:** `GET`
+*   **URL:** `/api/v1/obligaciones-nrus/cliente/{idCliente}`
+*   **Parámetros de Ruta:**
+    *   `idCliente`: `Long` (ID del cliente)
+*   **Parámetros de Consulta (Opcionales para Filtrado):**
+    *   `periodo`: `String` en formato `YYYY-MM-DD`. Para filtrar por un mes y año específicos (ej. "2024-07-01").
+    *   `estado`: `String` (ej. "PENDIENTE", "PAGADA"). Debe coincidir con los valores del enum `EstadoObligacion`.
+*   **Ejemplos:**
+    *   `GET /api/v1/obligaciones-nrus/cliente/123` (Todas las obligaciones del cliente 123)
+    *   `GET /api/v1/obligaciones-nrus/cliente/123?periodo=2024-06-01` (Obligaciones del cliente 123 para Junio 2024)
+    *   `GET /api/v1/obligaciones-nrus/cliente/123?estado=PENDIENTE` (Obligaciones pendientes del cliente 123)
+    *   `GET /api/v1/obligaciones-nrus/cliente/123?periodo=2024-05-01&estado=VENCIDA` (Obligaciones vencidas del cliente 123 para Mayo 2024)
+
+### 2.3. Obtener una Obligación NRUS por ID
+
+*   **Método:** `GET`
+*   **URL:** `/api/v1/obligaciones-nrus/{id}`
+*   **Parámetros de Ruta:**
+    *   `id`: `Long` (ID de la obligación)
+
+### 2.4. Registrar un Pago para una Obligación NRUS
+
+Este endpoint se utiliza cuando el cliente (o contador) realiza un pago.
+
+*   **Método:** `POST`
+*   **URL:** `/api/v1/pagos-nrus/{idObligacionNrus}/registrar`
+*   **Parámetros de Ruta:**
+    *   `idObligacionNrus`: `Long` (ID de la obligación NRUS a la que se asocia el pago)
+*   **Cuerpo de la Solicitud:** `PagoNrusRequest` (JSON con los datos del pago).
+*   **Respuesta:** `PagoNrusResponse` del pago registrado. El backend actualizará automáticamente el estado de la `ObligacionNrus` asociada a `POR_CONFIRMAR`.
+
+## 3. Consideraciones para el Frontend
+
+*   **Dashboard de Obligaciones:**
+    *   Al cargar el módulo, primero llama a `/api/v1/obligaciones-nrus/generar-o-actualizar` para el `idCliente` y el `periodoTributario` actual (primer día del mes en curso).
+    *   Luego, llama a `/api/v1/obligaciones-nrus/cliente/{idCliente}` para mostrar la lista de obligaciones.
+    *   Implementa los filtros de periodo y estado para permitir al usuario refinar la búsqueda.
+*   **Botón "Pagar":**
+    *   Solo debe estar visible para obligaciones con `estado: "PENDIENTE"`.
+    *   Al hacer clic, presenta un formulario para que el usuario ingrese los detalles del pago.
+    *   Al confirmar el pago, envía un `POST` a `/api/v1/pagos-nrus/{idObligacionNrus}/registrar` con los datos del `PagoNrusRequest`.
+    *   Maneja la subida de archivos para el `urlComprobante` (esto requerirá un endpoint adicional para la subida de archivos, si aún no lo tienes implementado).
+*   **Manejo de Errores:** Prepárate para manejar las excepciones `ObligacionNrusNotFoundException` y `PagoNrusNotFoundException` que el backend podría devolver.
+*   **Roles:** Recuerda que todos estos endpoints están protegidos y solo son accesibles para usuarios con roles `CLIENTE` o `CONTADOR`. Asegúrate de que el token JWT se envíe en las cabeceras de autorización.

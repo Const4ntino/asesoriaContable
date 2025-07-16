@@ -36,4 +36,7 @@ public interface IngresoRepository extends JpaRepository<Ingreso, Long> {
 
     @Query("SELECT COALESCE(SUM(i.montoIgv), 0) FROM Ingreso i WHERE i.cliente.id = :clienteId AND i.fecha BETWEEN :startDate AND :endDate")
     BigDecimal sumMontoIgvByClienteIdAndFechaBetween(@Param("clienteId") Long clienteId, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
+    @Query("SELECT COALESCE(SUM(i.monto), 0) FROM Ingreso i WHERE i.cliente.id = :clienteId AND FUNCTION('DATE_TRUNC', 'month', i.fecha) = FUNCTION('DATE_TRUNC', 'month', :periodo)")
+    BigDecimal sumMontoByClienteIdAndPeriodo(@Param("clienteId") Long clienteId, @Param("periodo") LocalDate periodo);
 }

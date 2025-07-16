@@ -49,4 +49,12 @@ public class PagoNrusController {
         pagoNrusService.delete(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+    @PreAuthorize("hasAnyRole('CLIENTE', 'CONTADOR')")
+    @PostMapping("/{idObligacionNrus}/registrar")
+    public ResponseEntity<PagoNrusResponse> registrarPago(
+            @PathVariable Long idObligacionNrus,
+            @RequestBody PagoNrusRequest pagoNrusRequest) {
+        return new ResponseEntity<>(pagoNrusService.registrarPago(idObligacionNrus, pagoNrusRequest), HttpStatus.CREATED);
+    }
 }
