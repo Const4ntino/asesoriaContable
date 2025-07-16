@@ -63,7 +63,7 @@ public class UsuarioController {
 
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PutMapping("/{id}")
-    public UsuarioResponse update(@PathVariable Long id,@Valid @RequestBody UsuarioRequest request) {
+    public UsuarioResponse update(@PathVariable Long id,@Valid @RequestBody UsuarioUpdateRequest request) {
         return usuarioService.update(id, request);
     }
 

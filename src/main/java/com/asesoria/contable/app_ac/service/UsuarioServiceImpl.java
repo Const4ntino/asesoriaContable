@@ -4,6 +4,7 @@ import com.asesoria.contable.app_ac.exceptions.UsuarioNotFoundException;
 import com.asesoria.contable.app_ac.mapper.UsuarioMapper;
 import com.asesoria.contable.app_ac.model.dto.UsuarioRequest;
 import com.asesoria.contable.app_ac.model.dto.UsuarioResponse;
+import com.asesoria.contable.app_ac.model.dto.UsuarioUpdateRequest;
 import com.asesoria.contable.app_ac.model.entity.Usuario;
 import com.asesoria.contable.app_ac.repository.UsuarioRepository;
 import com.asesoria.contable.app_ac.utils.enums.Rol;
@@ -90,7 +91,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
-    public UsuarioResponse update(Long id, UsuarioRequest request) {
+    public UsuarioResponse update(Long id, UsuarioUpdateRequest request) {
         Rol rolValido;
         try {
             rolValido = Rol.valueOf(request.getRol().toUpperCase());

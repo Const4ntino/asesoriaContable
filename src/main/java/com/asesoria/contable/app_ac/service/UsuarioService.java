@@ -13,7 +13,7 @@ public interface UsuarioService {
     List<UsuarioResponse> findUsuariosClientesLibres(String username);
     List<UsuarioResponse> findUsuariosContadoresLibres(String username);
     UsuarioResponse save(UsuarioRequest request);
-    UsuarioResponse update(Long id, UsuarioRequest request);
+    UsuarioResponse update(Long id, UsuarioUpdateRequest request);
     void deleteById(Long id);
     List<UsuarioResponse> searchUsuarios(String searchTerm, List<String> roles, Boolean estado, String sortBy, String sortOrder);
 }
