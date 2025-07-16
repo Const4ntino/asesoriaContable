@@ -150,50 +150,29 @@ CREATE TABLE alerta_cliente (
 
 CREATE TABLE obligacion_nrus (
     id_obligacion_nrus BIGSERIAL PRIMARY KEY,
-    
     id_cliente BIGINT NOT NULL REFERENCES cliente(id_cliente) ON DELETE CASCADE,
-    
-    -- Cuota mensual obligatoria NRUS
     periodo_tributario DATE NOT NULL, -- Generalmente primer día del mes (ej. 2025-07-01)
-    
     tipo VARCHAR(100) NOT NULL DEFAULT 'CUOTA MENSUAL',
-    
-    categoria SMALLINT NOT NULL CHECK (categoria IN (1, 2, 3)), -- categoría NRUS
-    
     monto DECIMAL(12,2) NOT NULL CHECK (monto IN (20.00, 50.00)), -- valores fijos permitidos
-
     fecha_limite DATE NOT NULL, -- 5 de cada mes en este caso el 5 del mes siguiente del periodo tributario
-    estado VARCHAR(30) NOT NULL DEFAULT 'PENDIENTE'
-        CHECK (estado IN ('PENDIENTE', 'PAGADO', 'NO_DISPONIBLE')),
-
+    estado VARCHAR(30) NOT NULL DEFAULT 'PENDIENTE' CHECK (estado IN ('PENDIENTE', 'PAGADO', 'NO_DISPONIBLE')),
     observaciones TEXT,
-
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE pago_nrus (
     id_pago_nrus BIGSERIAL PRIMARY KEY,
-
     id_obligacion_nrus BIGINT NOT NULL REFERENCES obligacion_nrus(id_obligacion_nrus) ON DELETE CASCADE,
-
     monto_pagado DECIMAL(12,2) NOT NULL CHECK (monto_pagado IN (20.00, 50.00)),
-
     fecha_pago DATE NOT NULL,
-
-    medio_pago VARCHAR(30) NOT NULL 
-        CHECK (medio_pago IN ('TRANSFERENCIA', 'INTERBANK', 'BCP', 'YAPE', 'NPS', 'BANCO', 'APP')),
-
+    medio_pago VARCHAR(30) NOT NULL CHECK (medio_pago IN ('TRANSFERENCIA', 'INTERBANK', 'BCP', 'YAPE', 'NPS', 'BANCO', 'APP')),
     url_comprobante TEXT, -- ruta del comprobante
-
     estado VARCHAR(20) NOT NULL 
         CHECK (estado IN ('CUMPLIDO', 'ATRASADO')),
-
     pagado_por VARCHAR(20) NOT NULL 
         CHECK (pagado_por IN ('CLIENTE', 'CONTADOR')),
-
     comentario_contador TEXT,
-
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

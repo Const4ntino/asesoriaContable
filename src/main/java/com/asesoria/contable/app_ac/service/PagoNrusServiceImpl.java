@@ -1,0 +1,62 @@
+package com.asesoria.contable.app_ac.service;
+
+import com.asesoria.contable.app_ac.exceptions.PagoNrusNotFoundException;
+import com.asesoria.contable.app_ac.mapper.PagoNrusMapper;
+import com.asesoria.contable.app_ac.model.dto.PagoNrusRequest;
+import com.asesoria.contable.app_ac.model.dto.PagoNrusResponse;
+import com.asesoria.contable.app_ac.model.entity.PagoNrus;
+import com.asesoria.contable.app_ac.repository.PagoNrusRepository;
+import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@AllArgsConstructor
+@Service
+public class PagoNrusServiceImpl implements PagoNrusService {
+
+    private final PagoNrusRepository pagoNrusRepository;
+    private final PagoNrusMapper pagoNrusMapper;
+
+    @Override
+    public List<PagoNrusResponse> getAll() {
+        return pagoNrusRepository.findAll().stream()
+                .map(pagoNrusMapper::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public PagoNrusResponse getOne(Long id) {
+        return pagoNrusRepository.findById(id)
+                .map(pagoNrusMapper::convertToDto)
+                .orElseThrow(() -> new PagoNrusNotFoundException("Pago NRUS no encontrado"));
+    }
+
+    @Override
+    public PagoNrusResponse save(PagoNrusRequest pagoNrusRequest) {
+        PagoNrus entity = pagoNrusMapper.convertToEntity(pagoNrusRequest);
+        return pagoNrusMapper.convertToDto(pagoNrusRepository.save(entity));
+    }
+
+    @Override
+    public PagoNrusResponse update(Long id, PagoNrusRequest pagoNrusRequest) {
+        PagoNrus pagoNrus = pagoNrusRepository.findById(id)
+                .orElseThrow(() -> new PagoNrusNotFoundException("Pago NRUS no encontrado"));
+
+        pagoNrus.setMontoPagado(pagoNrusRequest.getMontoPagado());
+        pagoNrus.setFechaPago(pagoNrusRequest.getFechaPago());
+        pagoNrus.setMedioPago(pagoNrusRequest.getMedioPago());
+        pagoNrus.setUrlComprobante(pagoNrusRequest.getUrlComprobante());
+        pagoNrus.setEstado(pagoNrusRequest.getEstado());
+        pagoNrus.setPagadoPor(pagoNrusRequest.getPagadoPor());
+        pagoNrus.setComentarioContador(pagoNrusRequest.getComentarioContador());
+
+        return pagoNrusMapper.convertToDto(pagoNrusRepository.save(pagoNrus));
+    }
+
+    @Override
+    public void delete(Long id) {
+        pagoNrusRepository.deleteById(id);
+    }
+}
