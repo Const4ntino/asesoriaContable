@@ -17,10 +17,9 @@ import com.asesoria.contable.app_ac.repository.EgresoRepository;
 import com.asesoria.contable.app_ac.repository.IngresoRepository;
 import com.asesoria.contable.app_ac.utils.enums.Regimen;
 import com.asesoria.contable.app_ac.utils.enums.TipoCliente;
+import com.asesoria.contable.app_ac.specification.ContadorSpecification;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -32,6 +31,9 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import java.util.stream.Collectors;
 
 @Service
@@ -266,5 +268,22 @@ public class ContadorServiceImpl implements ContadorService {
         }
 
         return results;
+    }
+
+    @Override
+    public Page<ContadorResponse> findContadoresConClientes(String search, Pageable pageable) {
+        // Usar el Specification para filtrar contadores con clientes
+        Specification<Contador> spec = ContadorSpecification.contadoresConClientes(search);
+        Page<Contador> contadoresPage = contadorRepository.findAll(spec, pageable);
+        
+        return contadoresPage.map(contador -> {
+            ContadorResponse response = contadorMapper.toContadorResponse(contador);
+            
+            // Obtener el número de clientes para este contador
+            Long clienteCount = clienteRepository.countByContadorId(contador.getId());
+            response.setNumeroClientes(clienteCount);
+            
+            return response;
+        });
     }
 }

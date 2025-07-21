@@ -23,3 +23,13 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
+
+
+
+#    url: jdbc:postgresql://ep-noisy-breeze-ae621wd2-pooler.c-2.us-east-2.aws.neon.tech:5432/neondb?sslmode=require
+#    username: neondb_owner
+#    password: npg_zPtSy4jL7KqR
+
+#    url: jdbc:postgresql://localhost:5432/ac
+#    username: postgres
+#    password: 12345

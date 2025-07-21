@@ -14,6 +14,8 @@ import com.asesoria.contable.app_ac.utils.enums.Regimen;
 import com.asesoria.contable.app_ac.utils.enums.TipoContabilidad;
 import com.asesoria.contable.app_ac.utils.enums.TipoTributario;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -260,5 +262,42 @@ public class EgresoServiceImpl implements EgresoService {
         LocalDate inicioMes = mesAnterior.atDay(1);
         LocalDate finMes = mesAnterior.atEndOfMonth();
         return egresoRepository.sumMontoIgvByClienteIdAndFechaBetween(clienteId, inicioMes, finMes);
+    }
+    
+    @Override
+    public Page<EgresoResponse> filtrarEgresos(
+            Long clienteId,
+            BigDecimal montoMinimo,
+            BigDecimal montoMaximo,
+            LocalDate fechaInicio,
+            LocalDate fechaFin,
+            Integer mes,
+            Integer anio,
+            TipoTributario tipoTributario,
+            String descripcion,
+            String nroComprobante,
+            Pageable pageable) {
+        
+        // Verificar que el cliente existe
+        if (!clienteRepository.existsById(clienteId)) {
+            throw new ClienteNotFoundException();
+        }
+        
+        // Filtrar egresos con los criterios proporcionados
+        Page<Egreso> egresosPage = egresoRepository.filtrarEgresos(
+                clienteId,
+                montoMinimo,
+                montoMaximo,
+                fechaInicio,
+                fechaFin,
+                mes,
+                anio,
+                tipoTributario,
+                descripcion,
+                nroComprobante,
+                pageable);
+        
+        // Convertir a DTOs de respuesta
+        return egresosPage.map(egresoMapper::toEgresoResponse);
     }
 }

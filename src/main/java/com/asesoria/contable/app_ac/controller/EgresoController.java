@@ -8,8 +8,14 @@ import com.asesoria.contable.app_ac.service.ClienteService;
 import com.asesoria.contable.app_ac.service.EgresoService;
 import com.asesoria.contable.app_ac.service.IngresoService;
 import com.asesoria.contable.app_ac.utils.enums.Regimen;
+import com.asesoria.contable.app_ac.utils.enums.TipoTributario;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -18,6 +24,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,11 +74,48 @@ public class EgresoController {
     }
 
     // Filtrar ingresos por cliente
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'CONTADOR')")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @GetMapping("/cliente/{clienteId}")
-    public ResponseEntity<List<EgresoResponse>> getEgresosByClienteId(@PathVariable Long clienteId) {
-        List<EgresoResponse> ingresos = egresoService.findByClienteId(clienteId);
-        return ResponseEntity.ok(ingresos);
+    public ResponseEntity<List<EgresoResponse>> getEgresosByCliente(@PathVariable Long clienteId) {
+        List<EgresoResponse> egresos = egresoService.findByClienteId(clienteId);
+        return ResponseEntity.ok(egresos);
+    }
+
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @GetMapping("/cliente/{clienteId}/filtrar")
+    public ResponseEntity<Page<EgresoResponse>> filtrarEgresos(
+            @PathVariable Long clienteId,
+            @RequestParam(required = false) BigDecimal montoMinimo,
+            @RequestParam(required = false) BigDecimal montoMaximo,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin,
+            @RequestParam(required = false) Integer mes,
+            @RequestParam(required = false) Integer anio,
+            @RequestParam(required = false) TipoTributario tipoTributario,
+            @RequestParam(required = false) String descripcion,
+            @RequestParam(required = false) String nroComprobante,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "ASC") String sortDir) {
+
+        Sort.Direction direction = sortDir.equalsIgnoreCase("DESC") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+
+        Page<EgresoResponse> egresos = egresoService.filtrarEgresos(
+                clienteId,
+                montoMinimo,
+                montoMaximo,
+                fechaInicio,
+                fechaFin,
+                mes,
+                anio,
+                tipoTributario,
+                descripcion,
+                nroComprobante,
+                pageable);
+
+        return ResponseEntity.ok(egresos);
     }
 
     @PreAuthorize("hasRole('CLIENTE')")

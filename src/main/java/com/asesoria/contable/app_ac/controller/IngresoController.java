@@ -8,8 +8,13 @@ import com.asesoria.contable.app_ac.service.ClienteService;
 import com.asesoria.contable.app_ac.service.EgresoService;
 import com.asesoria.contable.app_ac.service.IngresoService;
 import com.asesoria.contable.app_ac.utils.enums.Regimen;
+import com.asesoria.contable.app_ac.utils.enums.TipoTributario;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -192,5 +197,47 @@ public class IngresoController {
         List<IngresoResponse> ingresos = ingresoService.findByClienteIdAndFechaBetween(clienteId, startDate, endDate);
         return ResponseEntity.ok(ingresos);
     }
+
+    // Filtrar ingresos con múltiples criterios y paginación
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @GetMapping("/cliente/{clienteId}/filtrar")
+    public ResponseEntity<Page<IngresoResponse>> filtrarIngresos(
+            @PathVariable Long clienteId,
+            @RequestParam(required = false) BigDecimal montoMinimo,
+            @RequestParam(required = false) BigDecimal montoMaximo,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin,
+            @RequestParam(required = false) Integer mes,
+            @RequestParam(required = false) Integer anio,
+            @RequestParam(required = false) TipoTributario tipoTributario,
+            @RequestParam(required = false) String descripcion,
+            @RequestParam(required = false) String nroComprobante,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "ASC") String sortDir) {
+        
+        // Crear objeto de paginación
+        Sort.Direction direction = sortDir.equalsIgnoreCase("DESC") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+        
+        // Llamar al servicio con todos los parámetros de filtrado
+        Page<IngresoResponse> ingresos = ingresoService.filtrarIngresos(
+                clienteId,
+                montoMinimo,
+                montoMaximo,
+                fechaInicio,
+                fechaFin,
+                mes,
+                anio,
+                tipoTributario,
+                descripcion,
+                nroComprobante,
+                pageable);
+        
+        return ResponseEntity.ok(ingresos);
+    }
+
+    
 
 }

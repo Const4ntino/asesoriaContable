@@ -3,6 +3,7 @@ package com.asesoria.contable.app_ac.repository;
 import com.asesoria.contable.app_ac.model.entity.Ingreso;
 import com.asesoria.contable.app_ac.utils.enums.TipoTributario;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,7 +13,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
-public interface IngresoRepository extends JpaRepository<Ingreso, Long> {
+public interface IngresoRepository extends JpaRepository<Ingreso, Long>, JpaSpecificationExecutor<Ingreso> {
     List<Ingreso> findByClienteId(Long clienteId);
     List<Ingreso> findByClienteIdAndFechaBetween(Long clienteId, LocalDate startDate, LocalDate endDate);
 

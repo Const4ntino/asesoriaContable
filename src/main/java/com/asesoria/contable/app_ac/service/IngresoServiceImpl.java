@@ -10,9 +10,12 @@ import com.asesoria.contable.app_ac.model.entity.Ingreso;
 import com.asesoria.contable.app_ac.model.entity.Usuario;
 import com.asesoria.contable.app_ac.repository.ClienteRepository;
 import com.asesoria.contable.app_ac.repository.IngresoRepository;
+import com.asesoria.contable.app_ac.specification.IngresoSpecification;
 import com.asesoria.contable.app_ac.utils.enums.Regimen;
 import com.asesoria.contable.app_ac.utils.enums.TipoTributario;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -260,6 +263,44 @@ public class IngresoServiceImpl implements IngresoService {
         LocalDate inicioMes = mesAnterior.atDay(1);
         LocalDate finMes = mesAnterior.atEndOfMonth();
         return ingresoRepository.sumMontoIgvByClienteIdAndFechaBetween(clienteId, inicioMes, finMes);
+    }
+    
+    @Override
+    public Page<IngresoResponse> filtrarIngresos(
+            Long clienteId,
+            BigDecimal montoMinimo,
+            BigDecimal montoMaximo,
+            LocalDate fechaInicio,
+            LocalDate fechaFin,
+            Integer mes,
+            Integer anio,
+            TipoTributario tipoTributario,
+            String descripcion,
+            String nroComprobante,
+            Pageable pageable) {
+        
+        // Verificar que el cliente existe
+        if (clienteId != null) {
+            clienteRepository.findById(clienteId)
+                    .orElseThrow(ClienteNotFoundException::new);
+        }
+        
+        // Crear la especificación con los filtros
+        var specification = IngresoSpecification.filtrarIngresos(
+                clienteId,
+                montoMinimo,
+                montoMaximo,
+                fechaInicio,
+                fechaFin,
+                mes,
+                anio,
+                tipoTributario,
+                descripcion,
+                nroComprobante);
+        
+        // Ejecutar la consulta con la especificación y paginación
+        return ingresoRepository.findAll(specification, pageable)
+                .map(ingresoMapper::toIngresoResponse);
     }
 }
 

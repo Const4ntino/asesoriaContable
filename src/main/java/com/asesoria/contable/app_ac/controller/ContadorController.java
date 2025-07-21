@@ -15,6 +15,10 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import java.net.URI;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 @RestController
 @RequiredArgsConstructor
@@ -72,6 +76,22 @@ public class ContadorController {
         return contadorService.searchContadores(searchTerm, sortBy, sortOrder);
     }
 
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @GetMapping("/con-clientes")
+    public ResponseEntity<Page<ContadorResponse>> findContadoresConClientes(
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "ASC") String sortDir) {
+        
+        Sort.Direction direction = sortDir.equalsIgnoreCase("DESC") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+        
+        Page<ContadorResponse> contadores = contadorService.findContadoresConClientes(search, pageable);
+        return ResponseEntity.ok(contadores);
+    }
+
     @PreAuthorize("hasRole('CONTADOR')")
     @GetMapping("/mis-clientes/naturales/metricas")
     public ResponseEntity<List<ClienteConMetricasResponse>> getClientesNaturalesConMetricas(
@@ -97,6 +117,4 @@ public class ContadorController {
         List<ClienteConMetricasResponse> clientes = contadorService.getClientesJuridicosConMetricas(usuario, regimen, rucDni, nombres, sortBy, sortOrder);
         return ResponseEntity.ok(clientes);
     }
-
-
 }

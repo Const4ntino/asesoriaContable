@@ -15,6 +15,7 @@ public interface ClienteRepository extends JpaRepository<Cliente, Long>, JpaSpec
     List<Cliente> findAllByContador(Contador contador);
     long countByContadorIsNotNull();
     long countByContadorIsNull();
+    long countByContadorId(Long contadorId);
 
     @Query("SELECT new com.asesoria.contable.app_ac.model.dto.RegimenClienteCountResponse(c.regimen, COUNT(c)) FROM Cliente c GROUP BY c.regimen")
     List<RegimenClienteCountResponse> countClientesByRegimen();

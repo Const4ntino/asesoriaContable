@@ -3,11 +3,14 @@ package com.asesoria.contable.app_ac.service;
 import com.asesoria.contable.app_ac.model.dto.IngresoRequest;
 import com.asesoria.contable.app_ac.model.dto.IngresoResponse;
 import com.asesoria.contable.app_ac.model.entity.Usuario;
+import com.asesoria.contable.app_ac.utils.enums.TipoTributario;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface IngresoService {
 
@@ -34,4 +37,18 @@ public interface IngresoService {
     BigDecimal getSumaIngresosExoneradosMesAnterior(Long clienteId);
     BigDecimal getSumaIngresosInafectosMesAnterior(Long clienteId);
     BigDecimal getSumaIgvIngresosMesAnterior(Long clienteId);
+    
+    // Nuevo método para filtrar ingresos con múltiples criterios
+    Page<IngresoResponse> filtrarIngresos(
+            Long clienteId,
+            BigDecimal montoMinimo,
+            BigDecimal montoMaximo,
+            LocalDate fechaInicio,
+            LocalDate fechaFin,
+            Integer mes,
+            Integer anio,
+            TipoTributario tipoTributario,
+            String descripcion,
+            String nroComprobante,
+            Pageable pageable);
 }

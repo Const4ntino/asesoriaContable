@@ -3,10 +3,14 @@ package com.asesoria.contable.app_ac.service;
 import com.asesoria.contable.app_ac.model.dto.EgresoRequest;
 import com.asesoria.contable.app_ac.model.dto.EgresoResponse;
 import com.asesoria.contable.app_ac.model.entity.Usuario;
+import com.asesoria.contable.app_ac.utils.enums.TipoTributario;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface EgresoService {
 
@@ -34,4 +38,18 @@ public interface EgresoService {
     BigDecimal getSumaEgresosExoneradosMesAnterior(Long clienteId);
     BigDecimal getSumaEgresosInafectosMesAnterior(Long clienteId);
     BigDecimal getSumaIgvEgresosMesAnterior(Long clienteId);
+    
+    // Filtrar egresos por cliente con paginación y filtros
+    Page<EgresoResponse> filtrarEgresos(
+            Long clienteId,
+            BigDecimal montoMinimo,
+            BigDecimal montoMaximo,
+            LocalDate fechaInicio,
+            LocalDate fechaFin,
+            Integer mes,
+            Integer anio,
+            TipoTributario tipoTributario,
+            String descripcion,
+            String nroComprobante,
+            Pageable pageable);
 }
