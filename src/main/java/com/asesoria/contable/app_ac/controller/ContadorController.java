@@ -97,4 +97,6 @@ public class ContadorController {
         List<ClienteConMetricasResponse> clientes = contadorService.getClientesJuridicosConMetricas(usuario, regimen, rucDni, nombres, sortBy, sortOrder);
         return ResponseEntity.ok(clientes);
     }
+
+
 }
