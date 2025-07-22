@@ -1,5 +1,6 @@
 package com.asesoria.contable.app_ac.service;
 
+import com.asesoria.contable.app_ac.aop.RegistrarBitacora;
 import com.asesoria.contable.app_ac.exceptions.ClienteNotFoundException;
 import com.asesoria.contable.app_ac.exceptions.UsuarioNotFoundException;
 import com.asesoria.contable.app_ac.mapper.ClienteMapper;
@@ -9,11 +10,9 @@ import com.asesoria.contable.app_ac.model.dto.auth.LoginUsuarioRequest;
 import com.asesoria.contable.app_ac.model.dto.auth.RegisterClienteRequest;
 import com.asesoria.contable.app_ac.model.entity.Cliente;
 import com.asesoria.contable.app_ac.model.entity.Usuario;
-import com.asesoria.contable.app_ac.utils.enums.Regimen;
-import com.asesoria.contable.app_ac.utils.enums.TipoCliente;
+import com.asesoria.contable.app_ac.utils.enums.*;
 import com.asesoria.contable.app_ac.repository.ClienteRepository;
 import com.asesoria.contable.app_ac.repository.UsuarioRepository;
-import com.asesoria.contable.app_ac.utils.enums.Rol;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -58,6 +57,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Transactional
     @Override
+    @RegistrarBitacora(modulo = Modulo.AUTH, accion = Accion.REGISTRO_CLIENTE)
     public AuthResponse registerCliente(RegisterClienteRequest request) {
         Usuario nuevoUsuario = Usuario.builder()
                 .username(request.getUsername())

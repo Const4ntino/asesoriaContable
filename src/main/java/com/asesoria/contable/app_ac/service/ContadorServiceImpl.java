@@ -1,5 +1,6 @@
 package com.asesoria.contable.app_ac.service;
 
+import com.asesoria.contable.app_ac.aop.RegistrarBitacora;
 import com.asesoria.contable.app_ac.exceptions.ContadorNotFoundException;
 import com.asesoria.contable.app_ac.exceptions.UsuarioNotFoundException;
 import com.asesoria.contable.app_ac.mapper.ClienteMapper;
@@ -15,6 +16,8 @@ import com.asesoria.contable.app_ac.repository.ContadorRepository;
 import com.asesoria.contable.app_ac.repository.UsuarioRepository;
 import com.asesoria.contable.app_ac.repository.EgresoRepository;
 import com.asesoria.contable.app_ac.repository.IngresoRepository;
+import com.asesoria.contable.app_ac.utils.enums.Accion;
+import com.asesoria.contable.app_ac.utils.enums.Modulo;
 import com.asesoria.contable.app_ac.utils.enums.Regimen;
 import com.asesoria.contable.app_ac.utils.enums.TipoCliente;
 import com.asesoria.contable.app_ac.specification.ContadorSpecification;
@@ -126,6 +129,7 @@ public class ContadorServiceImpl implements ContadorService {
     }
 
     @Override
+    @RegistrarBitacora(modulo = Modulo.CONTADOR, accion = Accion.ELIMINAR)
     public void deleteById(Long id) {
         if (contadorRepository.findById(id).isEmpty()) {
             throw new ContadorNotFoundException();

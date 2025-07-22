@@ -1,5 +1,6 @@
 package com.asesoria.contable.app_ac.service;
 
+import com.asesoria.contable.app_ac.aop.RegistrarBitacora;
 import com.asesoria.contable.app_ac.exceptions.ClienteNotFoundException;
 import com.asesoria.contable.app_ac.exceptions.ContadorNotFoundException;
 import com.asesoria.contable.app_ac.exceptions.UsuarioNotFoundException;
@@ -10,6 +11,8 @@ import com.asesoria.contable.app_ac.model.dto.MetricasDeclaracionResponse;
 import com.asesoria.contable.app_ac.model.entity.Cliente;
 import com.asesoria.contable.app_ac.model.entity.Contador;
 import com.asesoria.contable.app_ac.model.entity.Usuario;
+import com.asesoria.contable.app_ac.utils.enums.Accion;
+import com.asesoria.contable.app_ac.utils.enums.Modulo;
 import com.asesoria.contable.app_ac.utils.enums.Regimen;
 import com.asesoria.contable.app_ac.utils.enums.TipoCliente;
 import com.asesoria.contable.app_ac.repository.ClienteRepository;
@@ -189,6 +192,7 @@ public class ClienteServiceImpl implements ClienteService {
 
     @Override
     @Transactional
+    @RegistrarBitacora(modulo = Modulo.CLIENTE, accion = Accion.ASIGNAR_CONTADOR, descripcion = "Se asignó el contador con ID #[contadorId] al cliente con ID #[clienteId]")
     public ClienteResponse asignarContador(Long clienteId, Long contadorId) {
         Cliente cliente = clienteRepository.findById(clienteId)
                 .orElseThrow(ClienteNotFoundException::new);
@@ -202,6 +206,7 @@ public class ClienteServiceImpl implements ClienteService {
 
     @Override
     @Transactional
+    @RegistrarBitacora(modulo = Modulo.CLIENTE, accion = Accion.DESASIGNAR_CONTADOR)
     public void desasignarContador(Long clienteId) {
         Cliente cliente = clienteRepository.findById(clienteId)
                 .orElseThrow(ClienteNotFoundException::new);

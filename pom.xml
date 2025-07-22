@@ -123,6 +123,13 @@
             <scope>runtime</scope>
         </dependency>
         <!-- [CIERRE] Dependencias de JSONWEBTOKEN-->
+
+        <!-- Dependencia para AOP -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+        <!-- [CIERRE] Dependencia para AOP -->
     </dependencies>
 
     <build>

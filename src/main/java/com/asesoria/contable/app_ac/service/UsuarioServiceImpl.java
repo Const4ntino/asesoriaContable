@@ -1,5 +1,6 @@
 package com.asesoria.contable.app_ac.service;
 
+import com.asesoria.contable.app_ac.aop.RegistrarBitacora;
 import com.asesoria.contable.app_ac.exceptions.UsuarioNotFoundException;
 import com.asesoria.contable.app_ac.mapper.UsuarioMapper;
 import com.asesoria.contable.app_ac.model.dto.UsuarioRequest;
@@ -7,6 +8,8 @@ import com.asesoria.contable.app_ac.model.dto.UsuarioResponse;
 import com.asesoria.contable.app_ac.model.dto.UsuarioUpdateRequest;
 import com.asesoria.contable.app_ac.model.entity.Usuario;
 import com.asesoria.contable.app_ac.repository.UsuarioRepository;
+import com.asesoria.contable.app_ac.utils.enums.Accion;
+import com.asesoria.contable.app_ac.utils.enums.Modulo;
 import com.asesoria.contable.app_ac.utils.enums.Rol;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
@@ -127,6 +130,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
+    @RegistrarBitacora(modulo = Modulo.USUARIO, accion = Accion.ELIMINAR)
     public void deleteById(Long id) {
         if (usuarioRepository.findById(id).isEmpty()) {
             throw new UsuarioNotFoundException();
