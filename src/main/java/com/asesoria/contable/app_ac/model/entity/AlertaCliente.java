@@ -1,6 +1,7 @@
 package com.asesoria.contable.app_ac.model.entity;
 
 import com.asesoria.contable.app_ac.utils.enums.EstadoAlerta;
+import com.asesoria.contable.app_ac.utils.enums.TipoAlertaCliente;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -30,6 +31,10 @@ public class AlertaCliente {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private EstadoAlerta estado;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 50)
+    private TipoAlertaCliente tipo;
 
     @Column(name = "fecha_creacion", updatable = false)
     private LocalDateTime fechaCreacion;

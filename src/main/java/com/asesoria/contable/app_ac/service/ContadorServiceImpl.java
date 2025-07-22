@@ -1,6 +1,7 @@
 package com.asesoria.contable.app_ac.service;
 
 import com.asesoria.contable.app_ac.aop.RegistrarBitacora;
+import com.asesoria.contable.app_ac.exceptions.ClienteNotFoundException;
 import com.asesoria.contable.app_ac.exceptions.ContadorNotFoundException;
 import com.asesoria.contable.app_ac.exceptions.UsuarioNotFoundException;
 import com.asesoria.contable.app_ac.mapper.ClienteMapper;
@@ -50,6 +51,8 @@ public class ContadorServiceImpl implements ContadorService {
     private final ContadorMapper contadorMapper;
     private final IngresoRepository ingresoRepository;
     private final EgresoRepository egresoRepository;
+    private final AuthService authService;
+    private final BitacoraService bitacoraService;
 
     @Override
     public ContadorResponse findById(Long id) {
@@ -81,6 +84,12 @@ public class ContadorServiceImpl implements ContadorService {
     }
 
     @Override
+    public Contador findEntityByUsuarioId(Long usuarioId) {
+        return contadorRepository.findByUsuarioId(usuarioId)
+                .orElseThrow(ContadorNotFoundException::new);
+    }
+
+    @Override
     public ContadorResponse save(ContadorRequest request) {
         Usuario usuario = null;
 
@@ -99,6 +108,15 @@ public class ContadorServiceImpl implements ContadorService {
                 .nroColegiatura(request.getNroColegiatura())
                 .usuario(usuario) // puede ser null
                 .build();
+
+        // 👉 Registrar en bitácora
+        Usuario usuarioActual = authService.getUsuarioActual();
+        bitacoraService.registrarMovimiento(
+                usuarioActual,
+                Modulo.CONTADOR,
+                Accion.REGISTRO_CONTADOR,
+                "Se registró el contador: " + contador.getNombres() + " " + contador.getApellidos()
+        );
 
         return contadorMapper.toContadorResponse(contadorRepository.save(contador));
     }
@@ -122,6 +140,15 @@ public class ContadorServiceImpl implements ContadorService {
                     } else {
                         contador.setUsuario(null); // Si decides permitir quitar la asociación
                     }
+
+                    // 👉 Registrar en bitácora
+                    Usuario usuarioActual = authService.getUsuarioActual();
+                    bitacoraService.registrarMovimiento(
+                            usuarioActual,
+                            Modulo.CONTADOR,
+                            Accion.ACTUALIZAR,
+                            "Se actualizó el contador: " + request.getNombres() + " " + request.getApellidos()
+                    );
 
                     return contadorMapper.toContadorResponse(contadorRepository.save(contador));
                 })

@@ -135,6 +135,7 @@ CREATE TABLE alerta_contador (
     id_contador BIGINT NOT NULL REFERENCES contador(id_contador) ON DELETE CASCADE,
     descripcion TEXT NOT NULL,
     estado VARCHAR(20) DEFAULT 'ACTIVO' CHECK (estado IN ('ACTIVO', 'VISTO', 'RESUELTO')),
+    tipo VARCHAR(50) NOT NULL,
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     fecha_expiracion TIMESTAMP NOT NULL
 );
@@ -144,6 +145,7 @@ CREATE TABLE alerta_cliente (
     id_cliente BIGINT NOT NULL REFERENCES cliente(id_cliente) ON DELETE CASCADE,
     descripcion TEXT NOT NULL,
     estado VARCHAR(20) DEFAULT 'ACTIVO' CHECK (estado IN ('ACTIVO', 'VISTO', 'RESUELTO')),
+    tipo VARCHAR(50) NOT NULL,
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     fecha_expiracion TIMESTAMP NOT NULL
 );

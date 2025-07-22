@@ -3,21 +3,13 @@ package com.asesoria.contable.app_ac.service;
 import com.asesoria.contable.app_ac.exceptions.ClienteNotFoundException;
 import com.asesoria.contable.app_ac.exceptions.DeclaracionNotFoundException;
 import com.asesoria.contable.app_ac.mapper.DeclaracionMapper;
-import com.asesoria.contable.app_ac.model.dto.AlertaContadorRequest;
-import com.asesoria.contable.app_ac.model.dto.DeclaracionRequest;
-import com.asesoria.contable.app_ac.model.dto.DeclaracionResponse;
-import com.asesoria.contable.app_ac.model.dto.PeriodoVencimientoResponse;
-import com.asesoria.contable.app_ac.model.dto.ObligacionRequest;
+import com.asesoria.contable.app_ac.model.dto.*;
 import com.asesoria.contable.app_ac.model.entity.*;
-import com.asesoria.contable.app_ac.utils.enums.EstadoObligacion;
+import com.asesoria.contable.app_ac.utils.enums.*;
 import com.asesoria.contable.app_ac.repository.ClienteRepository;
 import com.asesoria.contable.app_ac.repository.ContadorRepository;
 import com.asesoria.contable.app_ac.repository.DeclaracionRepository;
 import com.asesoria.contable.app_ac.repository.UsuarioRepository;
-import com.asesoria.contable.app_ac.utils.enums.CronogramaVencimientoSunat;
-import com.asesoria.contable.app_ac.utils.enums.DeclaracionEstado;
-import com.asesoria.contable.app_ac.utils.enums.EstadoCliente;
-import com.asesoria.contable.app_ac.utils.enums.EstadoContador;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
@@ -32,6 +24,7 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -49,6 +42,9 @@ public class DeclaracionServiceImpl implements DeclaracionService {
     private final ContadorRepository contadorRepository;
     private final AlertaContadorService alertaContadorService;
     private final ObligacionService obligacionService;
+    private final AuthService authService;
+    private final BitacoraService bitacoraService;
+    private final AlertaClienteService alertaClienteService;
 
     @Override
     public DeclaracionResponse findById(Long id) {
@@ -149,6 +145,28 @@ public class DeclaracionServiceImpl implements DeclaracionService {
 //        nuevaDeclaracion.setEstado(DeclaracionEstado.CREADO);
 
         Declaracion declaracionGuardada = declaracionRepository.save(nuevaDeclaracion);
+
+        // 👉 Si está por vencer (<= 5 días pero no vencido aún), crear alerta
+        long diasRestantes = ChronoUnit.DAYS.between(LocalDate.now(), fechaLimite);
+        if (diasRestantes <= 5 && diasRestantes > 0) {
+            AlertaClienteRequest alerta = new AlertaClienteRequest();
+            alerta.setIdCliente(cliente.getId());
+            alerta.setDescripcion("La declaración del periodo " + periodo + " está por vencer en " + diasRestantes + " días.");
+            alerta.setTipo(com.asesoria.contable.app_ac.utils.enums.TipoAlertaCliente.DECLARACION_POR_VENCER.name());
+            alerta.setFechaExpiracion(fechaLimite.atTime(23, 59));
+
+            alertaClienteService.save(alerta);
+        }
+
+        // 👉 Registrar en la bitácora
+        Usuario usuarioActual = authService.getUsuarioActual();
+        bitacoraService.registrarMovimiento(
+                usuarioActual,
+                Modulo.DECLARACION,
+                Accion.DECLARACION_GENERADA,
+                "Se generó la declaración del periodo " + periodo + " para el cliente " + cliente.getNombres() + " " + cliente.getApellidos() + " RUC: " + cliente.getRucDni()
+        );
+
         return declaracionMapper.toDeclaracionResponse(declaracionGuardada);
     }
 
@@ -364,6 +382,28 @@ public class DeclaracionServiceImpl implements DeclaracionService {
 
         obligacionService.save(obligacionRequest);
 
+        // 👉 Generar alerta por nueva obligación
+        AlertaClienteRequest alerta = new AlertaClienteRequest();
+        alerta.setIdCliente(declaracion.getCliente().getId());
+        alerta.setDescripcion("Declaración completa, ahora tienes una nueva obligación pendiente del periodo " +
+                declaracion.getPeriodoTributario() +
+                " por un monto de S/ " + declaracion.getTotalPagarDeclaracion());
+        alerta.setTipo(com.asesoria.contable.app_ac.utils.enums.TipoAlertaCliente.NUEVA_OBLIGACION.name());
+        alerta.setFechaExpiracion(declaracion.getFechaLimite().atTime(23, 59)); // Convertimos a LocalDateTime
+
+        alertaClienteService.save(alerta);
+
+        // 👉 Registrar en la bitácora
+        Usuario usuarioActual = authService.getUsuarioActual();
+        bitacoraService.registrarMovimiento(
+                usuarioActual,
+                Modulo.DECLARACION,
+                Accion.OBLIGACION_GENERADA,
+                "Se marcó como DECLARADO y se generó obligación del periodo " +
+                        declaracionActualizada.getPeriodoTributario() +
+                        " para el cliente " + declaracion.getCliente().getNombres() + " " + declaracion.getCliente().getApellidos() + " RUC: " + declaracion.getCliente().getRucDni()
+        );
+
         return declaracionMapper.toDeclaracionResponse(declaracionActualizada);
     }
 
@@ -380,6 +420,16 @@ public class DeclaracionServiceImpl implements DeclaracionService {
         }
 
         Declaracion declaracionActualizada = declaracionRepository.save(declaracion);
+
+        // 👉 Crear alerta de "EN PROCESO"
+        AlertaClienteRequest alerta = new AlertaClienteRequest();
+        alerta.setIdCliente(declaracion.getCliente().getId());
+        alerta.setDescripcion("La declaración del periodo " + declaracion.getPeriodoTributario() +
+                " se encuentra EN PROCESO. Monto estimado a pagar: S/ " + monto);
+        alerta.setTipo(com.asesoria.contable.app_ac.utils.enums.TipoAlertaCliente.DECLARACION_EN_PROCESO.name());
+        alerta.setFechaExpiracion(declaracion.getFechaLimite().atTime(23, 59));
+
+        alertaClienteService.save(alerta);
 
         return declaracionMapper.toDeclaracionResponse(declaracionActualizada);
     }

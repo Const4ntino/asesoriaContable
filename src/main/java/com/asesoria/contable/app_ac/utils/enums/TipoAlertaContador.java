@@ -1,0 +1,14 @@
+package com.asesoria.contable.app_ac.utils.enums;
+
+public enum TipoAlertaContador {
+    DECLARACION_EN_PROCESO,
+    DECLARACION_POR_VENCER,
+    OBLIGACION_POR_VENCER,
+    DECLARACION_VENCIDA,
+    OBLIGACION_VENCIDA,
+    NUEVA_OBLIGACION,
+    DECLARACION_COMPLETADA,
+    OBLIGACION_RESUELTA,
+    PAGO_RECHAZADO,
+    PAGO_ACEPTADO
+}

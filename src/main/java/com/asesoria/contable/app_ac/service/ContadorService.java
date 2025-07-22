@@ -5,6 +5,7 @@ import com.asesoria.contable.app_ac.model.dto.ContadorResponse;
 import com.asesoria.contable.app_ac.model.entity.Cliente;
 
 import com.asesoria.contable.app_ac.model.dto.ClienteConMetricasResponse;
+import com.asesoria.contable.app_ac.model.entity.Contador;
 import com.asesoria.contable.app_ac.model.entity.Usuario;
 
 import org.springframework.data.domain.Page;
@@ -16,6 +17,7 @@ public interface ContadorService {
     ContadorResponse findById(Long id);
     List<ContadorResponse> findAll();
     ContadorResponse findByUsuarioId(Long usuarioId);
+    Contador findEntityByUsuarioId(Long usuarioId);
     ContadorResponse save(ContadorRequest request);
     ContadorResponse update(Long id, ContadorRequest request);
     void deleteById(Long id);

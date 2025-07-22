@@ -31,6 +31,8 @@ public class UsuarioServiceImpl implements UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final UsuarioMapper usuarioMapper;
     private final PasswordEncoder passwordEncoder;
+    private final AuthService authService;
+    private final BitacoraService bitacoraService;
 
     @Override
     public UsuarioResponse findById(Long id) {
@@ -83,6 +85,17 @@ public class UsuarioServiceImpl implements UsuarioService {
 
         Usuario usuarioGuardado = usuarioRepository.save(usuario);
 
+        // Obtener el usuario autenticado que está creando este nuevo usuario
+        Usuario usuarioActual = authService.getUsuarioActual();
+
+        bitacoraService.registrarMovimiento(
+                usuarioActual,
+                Modulo.USUARIO,
+                Accion.CREAR,
+                "Se creó un nuevo usuario: " + usuarioGuardado.getNombres() + " " +
+                        usuarioGuardado.getApellidos() + " (rol: " + usuarioGuardado.getRol().name() + ")"
+        );
+
         return UsuarioResponse.builder()
                 .id(usuarioGuardado.getId())
                 .username(usuarioGuardado.getUsername())
@@ -105,6 +118,12 @@ public class UsuarioServiceImpl implements UsuarioService {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(UsuarioNotFoundException::new);
 
+        // Guardar datos anteriores para la bitácora
+        String datosAnteriores = "Usuario anterior: " + usuario.getNombres() + " " + usuario.getApellidos() +
+                " | username: " + usuario.getUsername() +
+                " | rol: " + usuario.getRol().name() +
+                " | estado: " + usuario.isEstado();
+
         usuario.setUsername(request.getUsername());
 
         // ✅ Solo actualiza la contraseña si se envía una no vacía
@@ -118,6 +137,21 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuario.setEstado(Boolean.TRUE.equals(request.getEstado())); // estado true por defecto
 
         Usuario usuarioActualizado = usuarioRepository.save(usuario);
+
+        // Guardar datos nuevos para la bitácora (en texto plano)
+        String datosNuevos = "Usuario actualizado: " + usuarioActualizado.getNombres() + " " + usuarioActualizado.getApellidos() +
+                " | username: " + usuarioActualizado.getUsername() +
+                " | rol: " + usuarioActualizado.getRol().name() +
+                " | estado: " + usuarioActualizado.isEstado();
+
+        Usuario usuarioActual = authService.getUsuarioActual();
+
+        bitacoraService.registrarMovimiento(
+                usuarioActual,
+                Modulo.USUARIO,
+                Accion.ACTUALIZAR,
+                "Actualización de usuario.\nAntes: " + datosAnteriores + "\nDespués: " + datosNuevos
+        );
 
         return UsuarioResponse.builder()
                 .id(usuarioActualizado.getId())

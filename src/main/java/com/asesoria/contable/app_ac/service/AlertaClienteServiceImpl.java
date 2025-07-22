@@ -9,6 +9,7 @@ import com.asesoria.contable.app_ac.model.entity.AlertaCliente;
 import com.asesoria.contable.app_ac.model.entity.Cliente;
 import com.asesoria.contable.app_ac.repository.AlertaClienteRepository;
 import com.asesoria.contable.app_ac.repository.ClienteRepository;
+import com.asesoria.contable.app_ac.utils.enums.EstadoAlerta;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -31,12 +32,20 @@ public class AlertaClienteServiceImpl implements AlertaClienteService {
     }
 
     @Override
-    public List<AlertaClienteResponse> findAll() {
-        return alertaClienteRepository.findAll()
+    public List<AlertaClienteResponse> findAllByClienteId(Long id) {
+        return alertaClienteRepository.findByClienteIdOrderByFechaCreacionDesc(id)
                 .stream()
                 .map(alertaClienteMapper::toAlertaClienteResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
+
+//    @Override
+//    public List<AlertaClienteResponse> findAll() {
+//        return alertaClienteRepository.findAll()
+//                .stream()
+//                .map(alertaClienteMapper::toAlertaClienteResponse)
+//                .collect(Collectors.toList());
+//    }
 
     @Override
     public AlertaClienteResponse save(AlertaClienteRequest request) {
@@ -51,25 +60,43 @@ public class AlertaClienteServiceImpl implements AlertaClienteService {
     }
 
     @Override
-    public AlertaClienteResponse update(Long id, AlertaClienteRequest request) {
-        AlertaCliente alertaCliente = alertaClienteRepository.findById(id)
-                .orElseThrow(AlertaClienteNotFoundException::new);
-
-        Cliente cliente = clienteRepository.findById(request.getIdCliente())
-                .orElseThrow(ClienteNotFoundException::new);
-
-        alertaClienteMapper.updateAlertaClienteFromRequest(request, alertaCliente);
-        alertaCliente.setCliente(cliente);
-
-        AlertaCliente alertaActualizada = alertaClienteRepository.save(alertaCliente);
-        return alertaClienteMapper.toAlertaClienteResponse(alertaActualizada);
+    public void marcarComoVisto(Long idAlerta) {
+        AlertaCliente alerta = alertaClienteRepository.findById(idAlerta)
+                .orElseThrow(() -> new RuntimeException("Alerta no encontrada"));
+        alerta.setEstado(EstadoAlerta.VISTO);
+        alertaClienteRepository.save(alerta);
     }
 
     @Override
-    public void deleteById(Long id) {
-        if (alertaClienteRepository.findById(id).isEmpty()) {
-            throw new AlertaClienteNotFoundException();
-        }
-        alertaClienteRepository.deleteById(id);
+    public void marcarComoResuelto(Long idAlerta) {
+        AlertaCliente alerta = alertaClienteRepository.findById(idAlerta)
+                .orElseThrow(() -> new RuntimeException("Alerta no encontrada"));
+        alerta.setEstado(EstadoAlerta.RESUELTO);
+        alertaClienteRepository.save(alerta);
+        alertaClienteRepository.deleteById(idAlerta);
     }
+
+
+//    @Override
+//    public AlertaClienteResponse update(Long id, AlertaClienteRequest request) {
+//        AlertaCliente alertaCliente = alertaClienteRepository.findById(id)
+//                .orElseThrow(AlertaClienteNotFoundException::new);
+//
+//        Cliente cliente = clienteRepository.findById(request.getIdCliente())
+//                .orElseThrow(ClienteNotFoundException::new);
+//
+//        alertaClienteMapper.updateAlertaClienteFromRequest(request, alertaCliente);
+//        alertaCliente.setCliente(cliente);
+//
+//        AlertaCliente alertaActualizada = alertaClienteRepository.save(alertaCliente);
+//        return alertaClienteMapper.toAlertaClienteResponse(alertaActualizada);
+//    }
+
+//    @Override
+//    public void deleteById(Long id) {
+//        if (alertaClienteRepository.findById(id).isEmpty()) {
+//            throw new AlertaClienteNotFoundException();
+//        }
+//        alertaClienteRepository.deleteById(id);
+//    }
 }

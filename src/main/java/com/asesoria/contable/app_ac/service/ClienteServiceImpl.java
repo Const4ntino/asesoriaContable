@@ -43,11 +43,13 @@ public class ClienteServiceImpl implements ClienteService {
     private final ClienteRepository clienteRepository;
     private final UsuarioRepository usuarioRepository;
     private final ContadorRepository contadorRepository;
+    private final BitacoraService bitacoraService;
     private final ClienteMapper clienteMapper;
     private final IngresoService ingresoService;
     private final EgresoService egresoService;
     private final IngresoRepository ingresoRepository;
     private final EgresoRepository egresoRepository;
+    private final AuthService authService;
 
     @Override
     public ClienteResponse findById(Long id) {
@@ -129,6 +131,19 @@ public class ClienteServiceImpl implements ClienteService {
                 .build();
 
         Cliente clienteGuardado = clienteRepository.save(cliente);
+
+        // 👉 Obtener usuario que está creando
+        Usuario usuarioActual = authService.getUsuarioActual();
+
+        // 👉 Registrar bitácora
+        bitacoraService.registrarMovimiento(
+                usuarioActual,
+                Modulo.CLIENTE,
+                Accion.CREAR,
+                "Se registró un nuevo cliente: " + clienteGuardado.getNombres() + " " + clienteGuardado.getApellidos()
+                        + " | RUC/DNI: " + clienteGuardado.getRucDni()
+        );
+
         return clienteMapper.toClienteResponse(clienteGuardado);
     }
 
@@ -179,6 +194,18 @@ public class ClienteServiceImpl implements ClienteService {
         cliente.setContador(contador);
 
         Cliente clienteActualizado = clienteRepository.save(cliente);
+
+        // 👉 Registrar movimiento en bitácora
+        Usuario usuarioActual = authService.getUsuarioActual();
+        bitacoraService.registrarMovimiento(
+                usuarioActual,
+                Modulo.CLIENTE,
+                Accion.ACTUALIZAR,
+                "Se actualizó el cliente: " + clienteActualizado.getNombres() + " " + clienteActualizado.getApellidos()
+                        + " | RUC/DNI: " + clienteActualizado.getRucDni()
+        );
+
+
         return clienteMapper.toClienteResponse(clienteActualizado);
     }
 
@@ -192,7 +219,7 @@ public class ClienteServiceImpl implements ClienteService {
 
     @Override
     @Transactional
-    @RegistrarBitacora(modulo = Modulo.CLIENTE, accion = Accion.ASIGNAR_CONTADOR, descripcion = "Se asignó el contador con ID #[contadorId] al cliente con ID #[clienteId]")
+    @RegistrarBitacora(modulo = Modulo.CLIENTE, accion = Accion.ASIGNAR_CONTADOR, descripcion = "Se asignó al contador '#[contador.nombres]' (DNI: #[contador.dni]) al cliente '#[cliente.nombres]' (RUC/DNI: #[cliente.rucDni])")
     public ClienteResponse asignarContador(Long clienteId, Long contadorId) {
         Cliente cliente = clienteRepository.findById(clienteId)
                 .orElseThrow(ClienteNotFoundException::new);
@@ -206,13 +233,21 @@ public class ClienteServiceImpl implements ClienteService {
 
     @Override
     @Transactional
-    @RegistrarBitacora(modulo = Modulo.CLIENTE, accion = Accion.DESASIGNAR_CONTADOR)
     public void desasignarContador(Long clienteId) {
         Cliente cliente = clienteRepository.findById(clienteId)
                 .orElseThrow(ClienteNotFoundException::new);
 
         cliente.setContador(null);
         clienteRepository.save(cliente);
+
+        Usuario usuarioActual = authService.getUsuarioActual();
+
+        bitacoraService.registrarMovimiento(
+                usuarioActual,
+                Modulo.CLIENTE,
+                Accion.DESASIGNAR_CONTADOR,
+                "Se desasignó el contador del cliente: " + cliente.getNombres() + " " + cliente.getApellidos()
+        );
     }
 
     @Override

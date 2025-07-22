@@ -7,9 +7,11 @@ import java.util.List;
 
 public interface AlertaClienteService {
 
+//    AlertaClienteResponse update(Long id, AlertaClienteRequest request);
+//    void deleteById(Long id);
     AlertaClienteResponse findById(Long id);
-    List<AlertaClienteResponse> findAll();
+    List<AlertaClienteResponse> findAllByClienteId(Long id);
     AlertaClienteResponse save(AlertaClienteRequest request);
-    AlertaClienteResponse update(Long id, AlertaClienteRequest request);
-    void deleteById(Long id);
+    void marcarComoVisto(Long idAlerta);
+    void marcarComoResuelto(Long idAlerta);
 }

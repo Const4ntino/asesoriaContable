@@ -16,10 +16,7 @@ import com.asesoria.contable.app_ac.repository.ContadorRepository;
 import com.asesoria.contable.app_ac.service.DeclaracionServiceImpl.*;
 import com.asesoria.contable.app_ac.repository.ObligacionRepository;
 import com.asesoria.contable.app_ac.repository.PagoRepository;
-import com.asesoria.contable.app_ac.utils.enums.EstadoObligacion;
-import com.asesoria.contable.app_ac.utils.enums.EstadoPago;
-import com.asesoria.contable.app_ac.utils.enums.MedioPago;
-import com.asesoria.contable.app_ac.utils.enums.PagadoPor;
+import com.asesoria.contable.app_ac.utils.enums.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -44,6 +41,8 @@ public class PagoServiceImpl implements PagoService {
     private final ContadorRepository contadorRepository;
     private final PagoMapper pagoMapper;
     private final ObligacionMapper obligacionMapper;
+    private final AuthService authService;
+    private final BitacoraService bitacoraService;
 
     @Override
     public PagoResponse findById(Long id) {
@@ -117,6 +116,16 @@ public class PagoServiceImpl implements PagoService {
             obligacionRepository.save(obligacionActual);
 
             pagoRepository.delete(pago);
+
+            // 👉 Bitácora
+            Usuario usuarioActual = authService.getUsuarioActual();
+            bitacoraService.registrarMovimiento(
+                    usuarioActual,
+                    Modulo.PAGO,
+                    Accion.ELIMINAR,
+                    "Se rechazó el pago de la obligación con ID " + obligacionActual.getId() +
+                            " del cliente " + pago.getObligacion().getCliente().getNombres() + " RUC: " + pago.getObligacion().getCliente().getRucDni()
+            );
         } catch (DataIntegrityViolationException ex) {
             throw new RuntimeException("Error de integridad al rechazar el pago.", ex);
         } catch (Exception ex) {
@@ -145,6 +154,16 @@ public class PagoServiceImpl implements PagoService {
 
             obligacion.setEstado(EstadoObligacion.PAGADA);
             obligacionRepository.save(obligacion);
+
+            // 👉 Bitácora
+            Usuario usuarioActual = authService.getUsuarioActual();
+            bitacoraService.registrarMovimiento(
+                    usuarioActual,
+                    Modulo.PAGO,
+                    Accion.CREAR,
+                    "Contador registró pago por obligación con ID " + obligacion.getId() +
+                            " del cliente " + pago.getObligacion().getCliente().getNombres() + " RUC: " + pago.getObligacion().getCliente().getRucDni()
+            );
 
             return pagoMapper.toPagoResponse(pagoGuardado);
 

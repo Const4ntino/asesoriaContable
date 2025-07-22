@@ -16,6 +16,9 @@ public class AlertaClienteRequest {
     @NotBlank(message = "La descripción no puede estar vacía")
     private String descripcion;
 
+    @NotBlank(message = "El tipo no puede estar vacío")
+    private String tipo;
+
     private EstadoAlerta estado;
 
     @NotNull(message = "La fecha de expiración no puede ser nula")

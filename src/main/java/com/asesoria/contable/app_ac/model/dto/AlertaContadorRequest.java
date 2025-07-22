@@ -18,6 +18,9 @@ public class AlertaContadorRequest {
 
     private EstadoAlerta estado;
 
+    @NotBlank(message = "El tipo no puede estar vacío")
+    private String tipo;
+
     @NotNull(message = "La fecha de expiración no puede ser nula")
     private LocalDateTime fechaExpiracion;
 }

@@ -163,6 +163,7 @@ public class ObligacionServiceImpl implements ObligacionService {
                 .toList();
     }
 
+    // No se usa al parecer
     @Override
     public ObligacionResponse saveFromDeclaracion(DeclaracionRequest declaracionRequest) {
         Cliente cliente = clienteRepository.findById(declaracionRequest.getIdCliente())
