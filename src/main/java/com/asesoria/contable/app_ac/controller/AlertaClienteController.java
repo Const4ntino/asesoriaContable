@@ -1,7 +1,11 @@
 package com.asesoria.contable.app_ac.controller;
 
+import com.asesoria.contable.app_ac.mapper.AlertaClienteMapper;
 import com.asesoria.contable.app_ac.model.dto.AlertaClienteRequest;
 import com.asesoria.contable.app_ac.model.dto.AlertaClienteResponse;
+import com.asesoria.contable.app_ac.model.dto.AlertaContadorResponse;
+import com.asesoria.contable.app_ac.model.entity.AlertaCliente;
+import com.asesoria.contable.app_ac.model.entity.AlertaContador;
 import com.asesoria.contable.app_ac.model.entity.Cliente;
 import com.asesoria.contable.app_ac.model.entity.Usuario;
 import com.asesoria.contable.app_ac.service.AlertaClienteService;
@@ -23,6 +27,7 @@ public class AlertaClienteController {
 
     private final AlertaClienteService alertaClienteService;
     private final ClienteService clienteService;
+    private final AlertaClienteMapper alertaClienteMapper;
 
     @PreAuthorize("hasRole('ADMINISTRADOR') or hasRole('CONTADOR')")
     @GetMapping("/{id}")
@@ -46,11 +51,26 @@ public class AlertaClienteController {
 //        return ResponseEntity.ok(alertas);
 //    }
 
-    @PreAuthorize("hasRole('ADMINISTRADOR') or hasRole('CONTADOR')")
+    @PreAuthorize("hasRole('ADMINISTRADOR') or hasRole('CLIENTE')")
     @PostMapping
     public ResponseEntity<AlertaClienteResponse> save(@Valid @RequestBody AlertaClienteRequest request) {
         AlertaClienteResponse newAlerta = alertaClienteService.save(request);
         return new ResponseEntity<>(newAlerta, HttpStatus.CREATED);
+    }
+
+    @PreAuthorize("hasRole('ADMINISTRADOR') or hasRole('CLIENTE')")
+    @PutMapping("/{id}/marcar-visto")
+    public ResponseEntity<AlertaClienteResponse> marcarComoVisto(@PathVariable Long id) {
+        AlertaCliente alertaActualizada = alertaClienteService.marcarComoVisto(id);
+        AlertaClienteResponse response = alertaClienteMapper.toAlertaClienteResponse(alertaActualizada);
+        return ResponseEntity.ok(response);
+    }
+
+    @PreAuthorize("hasRole('ADMINISTRADOR') or hasRole('CLIENTE')")
+    @PutMapping("/{id}/marcar-resuelto")
+    public ResponseEntity<Void> marcarComoResuelto(@PathVariable Long id) {
+        alertaClienteService.marcarComoResuelto(id);
+        return ResponseEntity.noContent().build();
     }
 
 //    @PreAuthorize("hasRole('ADMINISTRADOR') or hasRole('CONTADOR')")

@@ -61,11 +61,11 @@ public class AlertaContadorServiceImpl implements AlertaContadorService {
     }
 
     @Override
-    public void marcarComoVisto(Long idAlerta) {
+    public AlertaContador marcarComoVisto(Long idAlerta) {
         AlertaContador alerta = alertaContadorRepository.findById(idAlerta)
                 .orElseThrow(() -> new RuntimeException("Alerta no encontrada"));
         alerta.setEstado(EstadoAlerta.VISTO);
-        alertaContadorRepository.save(alerta);
+        return alertaContadorRepository.save(alerta);
     }
 
     @Override

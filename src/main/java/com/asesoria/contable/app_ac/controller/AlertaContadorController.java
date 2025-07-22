@@ -1,7 +1,9 @@
 package com.asesoria.contable.app_ac.controller;
 
+import com.asesoria.contable.app_ac.mapper.AlertaContadorMapper;
 import com.asesoria.contable.app_ac.model.dto.AlertaContadorRequest;
 import com.asesoria.contable.app_ac.model.dto.AlertaContadorResponse;
+import com.asesoria.contable.app_ac.model.entity.AlertaContador;
 import com.asesoria.contable.app_ac.model.entity.Contador;
 import com.asesoria.contable.app_ac.model.entity.Usuario;
 import com.asesoria.contable.app_ac.service.AlertaContadorService;
@@ -23,6 +25,7 @@ public class AlertaContadorController {
 
     private final AlertaContadorService alertaContadorService;
     private final ContadorService contadorService;
+    private final AlertaContadorMapper  alertaContadorMapper;
 
     @PreAuthorize("hasRole('ADMINISTRADOR') or hasRole('CONTADOR')")
     @GetMapping("/{id}")
@@ -52,6 +55,21 @@ public class AlertaContadorController {
     public ResponseEntity<AlertaContadorResponse> save(@Valid @RequestBody AlertaContadorRequest request) {
         AlertaContadorResponse newAlerta = alertaContadorService.save(request);
         return new ResponseEntity<>(newAlerta, HttpStatus.CREATED);
+    }
+
+    @PreAuthorize("hasRole('ADMINISTRADOR') or hasRole('CONTADOR')")
+    @PutMapping("/{id}/marcar-visto")
+    public ResponseEntity<AlertaContadorResponse> marcarComoVisto(@PathVariable Long id) {
+        AlertaContador alertaActualizada = alertaContadorService.marcarComoVisto(id);
+        AlertaContadorResponse response = alertaContadorMapper.toAlertaContadorResponse(alertaActualizada);
+        return ResponseEntity.ok(response);
+    }
+
+    @PreAuthorize("hasRole('ADMINISTRADOR') or hasRole('CONTADOR')")
+    @PutMapping("/{id}/marcar-resuelto")
+    public ResponseEntity<Void> marcarComoResuelto(@PathVariable Long id) {
+        alertaContadorService.marcarComoResuelto(id);
+        return ResponseEntity.noContent().build();
     }
 
 //    @PreAuthorize("hasRole('ADMINISTRADOR') or hasRole('CONTADOR')")
