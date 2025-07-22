@@ -156,6 +156,14 @@ public class DeclaracionServiceImpl implements DeclaracionService {
             alerta.setFechaExpiracion(fechaLimite.atTime(23, 59));
 
             alertaClienteService.save(alerta);
+
+            AlertaContadorRequest alerta2 = new AlertaContadorRequest();
+            alerta2.setIdContador(cliente.getContador().getId());
+            alerta2.setDescripcion("La declaración del cliente " + cliente.getNombres() + " " + cliente.getApellidos() + " RUC: " + cliente.getRucDni() + " del periodo " + periodo + " está por vencer en " + diasRestantes + " días.");
+            alerta2.setTipo(com.asesoria.contable.app_ac.utils.enums.TipoAlertaContador.DECLARACION_POR_VENCER.name());
+            alerta2.setFechaExpiracion(fechaLimite.atTime(23, 59));
+
+            alertaContadorService.save(alerta2);
         }
 
         // 👉 Registrar en la bitácora
@@ -393,6 +401,18 @@ public class DeclaracionServiceImpl implements DeclaracionService {
 
         alertaClienteService.save(alerta);
 
+        // 👉 Generar alerta por nueva obligación
+        Cliente cliente = declaracion.getCliente();
+        AlertaContadorRequest alerta2 = new AlertaContadorRequest();
+        alerta2.setIdContador(declaracion.getCliente().getContador().getId());
+        alerta2.setDescripcion("Declaración completa, ahora el cliente " + cliente.getNombres() + " " + cliente.getApellidos() + " RUC: " + cliente.getRucDni() + " tiene una nueva obligación pendiente del periodo " +
+                declaracion.getPeriodoTributario() +
+                " por un monto de S/ " + declaracion.getTotalPagarDeclaracion());
+        alerta2.setTipo(com.asesoria.contable.app_ac.utils.enums.TipoAlertaContador.NUEVA_OBLIGACION.name());
+        alerta2.setFechaExpiracion(declaracion.getFechaLimite().atTime(23, 59)); // Convertimos a LocalDateTime
+
+        alertaContadorService.save(alerta2);
+
         // 👉 Registrar en la bitácora
         Usuario usuarioActual = authService.getUsuarioActual();
         bitacoraService.registrarMovimiento(
@@ -430,6 +450,16 @@ public class DeclaracionServiceImpl implements DeclaracionService {
         alerta.setFechaExpiracion(declaracion.getFechaLimite().atTime(23, 59));
 
         alertaClienteService.save(alerta);
+
+        Cliente cliente = declaracion.getCliente();
+        // 👉 Crear alerta de "EN PROCESO"
+        AlertaContadorRequest alerta2 = new AlertaContadorRequest();
+        alerta2.setIdContador(cliente.getContador().getId());
+        alerta2.setDescripcion("Has inicializado el proceso de Declaración del cliente " + cliente.getNombres() + " " + cliente.getApellidos() + " RUC: " + cliente.getRucDni() + ", en el periodo: " + declaracion.getPeriodoTributario()  + " Monto estimado a pagar: S/ " + monto);
+        alerta2.setTipo(com.asesoria.contable.app_ac.utils.enums.TipoAlertaContador.DECLARACION_EN_PROCESO.name());
+        alerta2.setFechaExpiracion(declaracion.getFechaLimite().atTime(23, 59));
+
+        alertaContadorService.save(alerta2);
 
         return declaracionMapper.toDeclaracionResponse(declaracionActualizada);
     }

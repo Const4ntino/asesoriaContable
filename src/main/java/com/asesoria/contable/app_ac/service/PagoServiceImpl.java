@@ -1,19 +1,14 @@
 package com.asesoria.contable.app_ac.service;
 
-import com.asesoria.contable.app_ac.exceptions.ClienteNotFoundException;
 import com.asesoria.contable.app_ac.exceptions.ContadorNotFoundException;
 import com.asesoria.contable.app_ac.exceptions.ObligacionNotFoundException;
 import com.asesoria.contable.app_ac.exceptions.PagoNotFoundException;
 import com.asesoria.contable.app_ac.mapper.ObligacionMapper;
 import com.asesoria.contable.app_ac.mapper.PagoMapper;
-import com.asesoria.contable.app_ac.model.dto.PagoClienteRequest;
-import com.asesoria.contable.app_ac.model.dto.PagoContadorRequest;
-import com.asesoria.contable.app_ac.model.dto.PagoRequest;
-import com.asesoria.contable.app_ac.model.dto.PagoResponse;
+import com.asesoria.contable.app_ac.model.dto.*;
 import com.asesoria.contable.app_ac.model.entity.*;
 import com.asesoria.contable.app_ac.repository.ClienteRepository;
 import com.asesoria.contable.app_ac.repository.ContadorRepository;
-import com.asesoria.contable.app_ac.service.DeclaracionServiceImpl.*;
 import com.asesoria.contable.app_ac.repository.ObligacionRepository;
 import com.asesoria.contable.app_ac.repository.PagoRepository;
 import com.asesoria.contable.app_ac.utils.enums.*;
@@ -21,9 +16,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.Option;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +38,8 @@ public class PagoServiceImpl implements PagoService {
     private final ObligacionMapper obligacionMapper;
     private final AuthService authService;
     private final BitacoraService bitacoraService;
+    private final AlertaClienteService alertaClienteService;
+    private final AlertaContadorService alertaContadorService;
 
     @Override
     public PagoResponse findById(Long id) {
@@ -90,6 +87,28 @@ public class PagoServiceImpl implements PagoService {
         obligacion.setEstado(EstadoObligacion.POR_CONFIRMAR);
         obligacionRepository.save(obligacion);
 
+        // 🔔 ALERTA PARA CLIENTE: Confirmación de pago registrado
+        AlertaClienteRequest alertaCliente = new AlertaClienteRequest();
+        alertaCliente.setIdCliente(obligacion.getCliente().getId());
+        alertaCliente.setDescripcion("Se ha registrado tu pago del periodo " +
+                obligacion.getPeriodoTributario() + ". Está pendiente de validación.");
+        alertaCliente.setTipo(TipoAlertaCliente.PAGO_EN_PROCESO.name());
+        alertaCliente.setFechaExpiracion(LocalDateTime.now().plusDays(5)); // 5 días como expiración
+
+        alertaClienteService.save(alertaCliente);
+
+
+        // 🔔 ALERTA PARA CONTADOR: Validar pago
+        Cliente cliente = obligacion.getCliente();
+        AlertaContadorRequest alertaContador = new AlertaContadorRequest();
+        alertaContador.setIdContador(cliente.getContador().getId());
+        alertaContador.setDescripcion("El cliente " + cliente.getNombres() + " " + cliente.getApellidos() + " RUC: " + cliente.getRucDni() + " ha registrado un pago del periodo " + obligacion.getPeriodoTributario() +
+                ". Debes validarlo.");
+        alertaContador.setTipo(TipoAlertaContador.PAGO_POR_VALIDAR.name());
+        alertaContador.setFechaExpiracion(LocalDateTime.now().plusDays(5));
+
+        alertaContadorService.save(alertaContador);
+
         return pagoMapper.toPagoResponse(pagoGuardado);
     }
 
@@ -116,6 +135,28 @@ public class PagoServiceImpl implements PagoService {
             obligacionRepository.save(obligacionActual);
 
             pagoRepository.delete(pago);
+
+            // 🔔 ALERTA PARA CLIENTE: Rechazo de pago
+            AlertaClienteRequest alertaCliente = new AlertaClienteRequest();
+            alertaCliente.setIdCliente(obligacionActual.getCliente().getId());
+            alertaCliente.setDescripcion("El contador a rechazado tu pago del periodo " +
+                    obligacionActual.getPeriodoTributario() + ". Se deberá rectificar");
+            alertaCliente.setTipo(TipoAlertaCliente.PAGO_RECHAZADO.name());
+            alertaCliente.setFechaExpiracion(LocalDateTime.now().plusDays(5)); // 5 días como expiración
+
+            alertaClienteService.save(alertaCliente);
+
+
+            // 🔔 ALERTA PARA CONTADOR: Validar pago
+            Cliente cliente = obligacionActual.getCliente();
+            AlertaContadorRequest alertaContador = new AlertaContadorRequest();
+            alertaContador.setIdContador(cliente.getContador().getId());
+            alertaContador.setDescripcion("Haz rechazado el pago del cliente " + cliente.getNombres() + " " + cliente.getApellidos() + " RUC: " + cliente.getRucDni() + " del periodo " + obligacionActual.getPeriodoTributario() +
+                    ". Se debe rectificar.");
+            alertaContador.setTipo(TipoAlertaContador.PAGO_RECHAZADO.name());
+            alertaContador.setFechaExpiracion(LocalDateTime.now().plusDays(5));
+
+            alertaContadorService.save(alertaContador);
 
             // 👉 Bitácora
             Usuario usuarioActual = authService.getUsuarioActual();
@@ -155,6 +196,28 @@ public class PagoServiceImpl implements PagoService {
             obligacion.setEstado(EstadoObligacion.PAGADA);
             obligacionRepository.save(obligacion);
 
+            // 🔔 ALERTA PARA CLIENTE: Rechazo de pago
+            AlertaClienteRequest alertaCliente = new AlertaClienteRequest();
+            alertaCliente.setIdCliente(obligacion.getCliente().getId());
+            alertaCliente.setDescripcion("El contador a realizado el pago del periodo " +
+                    obligacion.getPeriodoTributario() + ". Ya se encuentra validado.");
+            alertaCliente.setTipo(TipoAlertaCliente.PAGO_VALIDADO.name());
+            alertaCliente.setFechaExpiracion(LocalDateTime.now().plusDays(5)); // 5 días como expiración
+
+            alertaClienteService.save(alertaCliente);
+
+
+            // 🔔 ALERTA PARA CONTADOR: Validar pago
+            Cliente cliente = obligacion.getCliente();
+            AlertaContadorRequest alertaContador = new AlertaContadorRequest();
+            alertaContador.setIdContador(cliente.getContador().getId());
+            alertaContador.setDescripcion("Haz realizado el pago del cliente " + cliente.getNombres() + " " + cliente.getApellidos() + " RUC: " + cliente.getRucDni() + " del periodo " + obligacion.getPeriodoTributario() +
+                    ". Ya se encuentra validado.");
+            alertaContador.setTipo(TipoAlertaContador.PAGO_RECHAZADO.name());
+            alertaContador.setFechaExpiracion(LocalDateTime.now().plusDays(5));
+
+            alertaContadorService.save(alertaContador);
+
             // 👉 Bitácora
             Usuario usuarioActual = authService.getUsuarioActual();
             bitacoraService.registrarMovimiento(
@@ -162,7 +225,7 @@ public class PagoServiceImpl implements PagoService {
                     Modulo.PAGO,
                     Accion.CREAR,
                     "Contador registró pago por obligación con ID " + obligacion.getId() +
-                            " del cliente " + pago.getObligacion().getCliente().getNombres() + " RUC: " + pago.getObligacion().getCliente().getRucDni()
+                            " del cliente " + cliente.getNombres() + " RUC: " + cliente.getRucDni()
             );
 
             return pagoMapper.toPagoResponse(pagoGuardado);
