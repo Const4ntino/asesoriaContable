@@ -176,3 +176,13 @@ CREATE TABLE pago_nrus (
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE bitacora_movimientos (
+    id_movimiento BIGSERIAL PRIMARY KEY,
+    usuario_id BIGINT REFERENCES usuario(id_usuario) ON DELETE SET NULL,
+    rol VARCHAR(50) NOT NULL CHECK (rol IN ('CLIENTE', 'CONTADOR', 'ADMINISTRADOR')),
+    modulo VARCHAR(100) NOT NULL,       -- Ej: 'DECLARACION', 'PAGO', 'USUARIO'
+    accion VARCHAR(50) NOT NULL,        -- Ej: 'CREAR', 'ACTUALIZAR', 'ELIMINAR', 'LOGIN'
+    descripcion TEXT,                   -- Detalles del cambio o acción realizada
+    fecha_movimiento TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

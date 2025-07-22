@@ -130,6 +130,14 @@ public class DeclaracionServiceImpl implements DeclaracionService {
         int ultimoDigito = Character.getNumericValue(ruc.charAt(ruc.length() - 1));
         LocalDate fechaLimite = CronogramaVencimientoSunat.getFechaVencimiento(periodo.toString(), ultimoDigito);
 
+        // Determinar el estado según si ya venció o no
+        DeclaracionEstado estado;
+        if (LocalDate.now().isAfter(fechaLimite)) {
+            estado = DeclaracionEstado.LISTO;
+        } else {
+            estado = DeclaracionEstado.CREADO;
+        }
+
         Declaracion nuevaDeclaracion = new Declaracion();
         nuevaDeclaracion.setCliente(cliente);
         nuevaDeclaracion.setPeriodoTributario(periodoTributario);
@@ -137,7 +145,8 @@ public class DeclaracionServiceImpl implements DeclaracionService {
         nuevaDeclaracion.setFechaLimite(fechaLimite);
         nuevaDeclaracion.setEstadoCliente(EstadoCliente.PENDIENTE);
         nuevaDeclaracion.setEstadoContador(EstadoContador.PENDIENTE);
-        nuevaDeclaracion.setEstado(DeclaracionEstado.CREADO);
+        nuevaDeclaracion.setEstado(estado);
+//        nuevaDeclaracion.setEstado(DeclaracionEstado.CREADO);
 
         Declaracion declaracionGuardada = declaracionRepository.save(nuevaDeclaracion);
         return declaracionMapper.toDeclaracionResponse(declaracionGuardada);

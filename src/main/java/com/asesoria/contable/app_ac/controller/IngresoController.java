@@ -199,7 +199,7 @@ public class IngresoController {
     }
 
     // Filtrar ingresos con múltiples criterios y paginación
-    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'CONTADOR')")
     @GetMapping("/cliente/{clienteId}/filtrar")
     public ResponseEntity<Page<IngresoResponse>> filtrarIngresos(
             @PathVariable Long clienteId,

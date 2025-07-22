@@ -49,6 +49,5 @@ public class RegisterClienteRequest {
     @Size(max = 50)
     private String regimen;
 
-    @NotBlank
     private String tipoCliente;
 }

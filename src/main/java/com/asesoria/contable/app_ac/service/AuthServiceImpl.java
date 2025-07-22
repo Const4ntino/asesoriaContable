@@ -75,6 +75,8 @@ public class AuthServiceImpl implements AuthService {
             } catch (IllegalArgumentException e) {
                 // Manejar el caso de un valor de regimen inválido, si es necesario
             }
+        } else {
+            regimen = Regimen.NRUS;
         }
 
         TipoCliente tipoCliente = null;
@@ -84,6 +86,8 @@ public class AuthServiceImpl implements AuthService {
             } catch (IllegalArgumentException e) {
                 throw new IllegalArgumentException("Tipo de cliente inválido: " + request.getTipoCliente());
             }
+        } else {
+            tipoCliente = TipoCliente.PERSONA_NATURAL;
         }
 
         Cliente nuevoCliente = new Cliente();
@@ -92,7 +96,6 @@ public class AuthServiceImpl implements AuthService {
         nuevoCliente.setRucDni(request.getRucDni());
         nuevoCliente.setEmail(request.getEmail());
         nuevoCliente.setTelefono(request.getTelefono());
-        nuevoCliente.setTipoRuc(request.getTipoRuc());
         nuevoCliente.setRegimen(regimen);
         nuevoCliente.setTipoCliente(tipoCliente);
         nuevoCliente.setUsuario(usuarioGuardado);

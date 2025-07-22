@@ -81,7 +81,7 @@ public class EgresoController {
         return ResponseEntity.ok(egresos);
     }
 
-    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'CONTADOR')")
     @GetMapping("/cliente/{clienteId}/filtrar")
     public ResponseEntity<Page<EgresoResponse>> filtrarEgresos(
             @PathVariable Long clienteId,
