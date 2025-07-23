@@ -413,17 +413,6 @@ public class DeclaracionServiceImpl implements DeclaracionService {
 
         alertaContadorService.save(alerta2);
 
-        // 👉 Registrar en la bitácora
-        Usuario usuarioActual = authService.getUsuarioActual();
-        bitacoraService.registrarMovimiento(
-                usuarioActual,
-                Modulo.DECLARACION,
-                Accion.OBLIGACION_GENERADA,
-                "Se marcó como DECLARADO y se generó obligación del periodo " +
-                        declaracionActualizada.getPeriodoTributario() +
-                        " para el cliente " + declaracion.getCliente().getNombres() + " " + declaracion.getCliente().getApellidos() + " RUC: " + declaracion.getCliente().getRucDni()
-        );
-
         return declaracionMapper.toDeclaracionResponse(declaracionActualizada);
     }
 

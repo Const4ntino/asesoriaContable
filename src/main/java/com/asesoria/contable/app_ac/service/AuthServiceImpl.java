@@ -59,7 +59,6 @@ public class AuthServiceImpl implements AuthService {
 
     @Transactional
     @Override
-    @RegistrarBitacora(modulo = Modulo.AUTH, accion = Accion.REGISTRO_CLIENTE)
     public AuthResponse registerCliente(RegisterClienteRequest request) {
         Usuario nuevoUsuario = Usuario.builder()
                 .username(request.getUsername())

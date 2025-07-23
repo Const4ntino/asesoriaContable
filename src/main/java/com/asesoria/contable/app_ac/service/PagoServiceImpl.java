@@ -199,7 +199,7 @@ public class PagoServiceImpl implements PagoService {
             // 🔔 ALERTA PARA CLIENTE: Rechazo de pago
             AlertaClienteRequest alertaCliente = new AlertaClienteRequest();
             alertaCliente.setIdCliente(obligacion.getCliente().getId());
-            alertaCliente.setDescripcion("El contador a realizado el pago del periodo " +
+            alertaCliente.setDescripcion("El contador ha realizado el pago del periodo " +
                     obligacion.getPeriodoTributario() + ". Ya se encuentra validado.");
             alertaCliente.setTipo(TipoAlertaCliente.PAGO_VALIDADO.name());
             alertaCliente.setFechaExpiracion(LocalDateTime.now().plusDays(5)); // 5 días como expiración
@@ -213,7 +213,7 @@ public class PagoServiceImpl implements PagoService {
             alertaContador.setIdContador(cliente.getContador().getId());
             alertaContador.setDescripcion("Haz realizado el pago del cliente " + cliente.getNombres() + " " + cliente.getApellidos() + " RUC: " + cliente.getRucDni() + " del periodo " + obligacion.getPeriodoTributario() +
                     ". Ya se encuentra validado.");
-            alertaContador.setTipo(TipoAlertaContador.PAGO_RECHAZADO.name());
+            alertaContador.setTipo(TipoAlertaContador.PAGO_ACEPTADO.name());
             alertaContador.setFechaExpiracion(LocalDateTime.now().plusDays(5));
 
             alertaContadorService.save(alertaContador);

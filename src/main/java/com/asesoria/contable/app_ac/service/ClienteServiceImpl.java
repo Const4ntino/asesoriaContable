@@ -219,7 +219,6 @@ public class ClienteServiceImpl implements ClienteService {
 
     @Override
     @Transactional
-    @RegistrarBitacora(modulo = Modulo.CLIENTE, accion = Accion.ASIGNAR_CONTADOR, descripcion = "Se asignó al contador '#[contador.nombres]' (DNI: #[contador.dni]) al cliente '#[cliente.nombres]' (RUC/DNI: #[cliente.rucDni])")
     public ClienteResponse asignarContador(Long clienteId, Long contadorId) {
         Cliente cliente = clienteRepository.findById(clienteId)
                 .orElseThrow(ClienteNotFoundException::new);
@@ -228,6 +227,16 @@ public class ClienteServiceImpl implements ClienteService {
                 .orElseThrow(ContadorNotFoundException::new);
 
         cliente.setContador(contador);
+
+        Usuario usuarioActual = authService.getUsuarioActual();
+
+        bitacoraService.registrarMovimiento(
+                usuarioActual,
+                Modulo.CLIENTE,
+                Accion.ASIGNAR_CONTADOR,
+                "Se asignó el contador " + contador.getNombres() + " DNI: " + contador.getDni() + " al cliente: " + cliente.getNombres() + " " + cliente.getApellidos()
+        );
+
         return clienteMapper.toClienteResponse(clienteRepository.save(cliente));
     }
 
