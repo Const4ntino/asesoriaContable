@@ -86,7 +86,7 @@ public enum CronogramaVencimientoSunat {;
                 6, LocalDate.of(2025, 7, 21),
                 7, LocalDate.of(2025, 7, 21),
                 8, LocalDate.of(2025, 7, 22),
-                9, LocalDate.of(2025, 7, 22)
+                9, LocalDate.of(2025, 7, 28)
         ));
 
         cronograma.put("2025-07", Map.of(
