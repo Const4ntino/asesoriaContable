@@ -13,7 +13,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
-public interface IngresoRepository extends JpaRepository<Ingreso, Long>, JpaSpecificationExecutor<Ingreso> {
+public interface IngresoRepository extends JpaRepository<Ingreso, Long>, JpaSpecificationExecutor<Ingreso>, IngresoRepositoryCustom {
     List<Ingreso> findByClienteId(Long clienteId);
     List<Ingreso> findByClienteIdAndFechaBetween(Long clienteId, LocalDate startDate, LocalDate endDate);
 

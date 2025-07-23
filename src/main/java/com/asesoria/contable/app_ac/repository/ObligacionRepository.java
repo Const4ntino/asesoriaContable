@@ -11,7 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 @Repository
-public interface ObligacionRepository extends JpaRepository<Obligacion, Long> {
+public interface ObligacionRepository extends JpaRepository<Obligacion, Long>, ObligacionRepositoryCustom {
     List<Obligacion> findByClienteId(Long clienteId);
 
     @Query(value = """

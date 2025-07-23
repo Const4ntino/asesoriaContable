@@ -148,7 +148,7 @@ public class DeclaracionServiceImpl implements DeclaracionService {
 
         // 👉 Si está por vencer (<= 5 días pero no vencido aún), crear alerta
         long diasRestantes = ChronoUnit.DAYS.between(LocalDate.now(), fechaLimite);
-        if (diasRestantes <= 5 && diasRestantes > 0) {
+        if (diasRestantes <= 5 && diasRestantes >= 0) {
             AlertaClienteRequest alerta = new AlertaClienteRequest();
             alerta.setIdCliente(cliente.getId());
             alerta.setDescripcion("La declaración del periodo " + periodo + " está por vencer en " + diasRestantes + " días.");

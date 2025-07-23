@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface PagoRepository extends JpaRepository<Pago, Long> {
+public interface PagoRepository extends JpaRepository<Pago, Long>, PagoRepositoryCustom {
     List<Pago> findAllByObligacion_Cliente_Id(Long idCliente);
 
     @Query("SELECT p FROM Pago p WHERE p.obligacion.cliente.contador.id = :contadorId")

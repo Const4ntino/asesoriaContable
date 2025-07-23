@@ -13,7 +13,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
-public interface EgresoRepository extends JpaRepository<Egreso, Long> {
+public interface EgresoRepository extends JpaRepository<Egreso, Long>, EgresoRepositoryCustom {
     List<Egreso> findByClienteId(Long clienteId);
     List<Egreso> findByClienteIdAndFechaBetween(Long clienteId, LocalDate startDate, LocalDate endDate);
 

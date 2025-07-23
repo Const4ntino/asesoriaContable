@@ -11,7 +11,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-public interface DeclaracionRepository extends JpaRepository<Declaracion, Long>, JpaSpecificationExecutor<Declaracion> {
+public interface DeclaracionRepository extends JpaRepository<Declaracion, Long>, JpaSpecificationExecutor<Declaracion>, DeclaracionRepositoryCustom {
     List<Declaracion> findByClienteId(Long clienteId);
 
     Optional<Declaracion> findByClienteIdAndPeriodoTributario(Long clienteId, LocalDate periodoTributario);
