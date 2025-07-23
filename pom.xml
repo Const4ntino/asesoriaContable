@@ -130,6 +130,19 @@
             <artifactId>spring-boot-starter-aop</artifactId>
         </dependency>
         <!-- [CIERRE] Dependencia para AOP -->
+
+        <!-- Dependencia para generación de PDFs -->
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>itextpdf</artifactId>
+            <version>5.5.13.3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>layout</artifactId>
+            <version>7.2.5</version>
+        </dependency>
+        <!-- [CIERRE] Dependencia para generación de PDFs -->
     </dependencies>
 
     <build>
