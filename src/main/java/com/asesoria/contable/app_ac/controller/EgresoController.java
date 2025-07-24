@@ -143,12 +143,16 @@ public class EgresoController {
         return ResponseEntity.noContent().build();
     }
 
-    // Filtrar ingresos por cliente
+    // Filtrar egresos por cliente con filtros opcionales de mes y año
     @PreAuthorize("hasRole('CLIENTE')")
     @GetMapping("/mis-egresos")
-    public ResponseEntity<List<EgresoResponse>> getMyEgresos(@AuthenticationPrincipal Usuario usuario) {
-        List<EgresoResponse> ingresos = egresoService.findByUsuarioId(usuario.getId());
-        return ResponseEntity.ok(ingresos);
+    public ResponseEntity<List<EgresoResponse>> getMyEgresos(
+            @AuthenticationPrincipal Usuario usuario,
+            @RequestParam(required = false) Integer mes,
+            @RequestParam(required = false) Integer anio) {
+        
+        List<EgresoResponse> egresos = egresoService.findByUsuarioIdAndPeriodo(usuario.getId(), mes, anio);
+        return ResponseEntity.ok(egresos);
     }
 
     @PreAuthorize("hasRole('CLIENTE')")

@@ -185,6 +185,32 @@ public class IngresoServiceImpl implements IngresoService {
                 .map(ingresoMapper::toIngresoResponse)
                 .collect(Collectors.toList());
     }
+    
+    @Override
+    public List<IngresoResponse> findByUsuarioIdAndPeriodo(Long usuarioId, Integer mes, Integer anio) {
+        Cliente cliente = clienteRepository.findByUsuarioId(usuarioId)
+                .orElseThrow(ClienteNotFoundException::new);
+        
+        // Crear la especificación con los filtros de mes y año
+        var specification = IngresoSpecification.filtrarIngresos(
+                cliente.getId(),
+                null,  // montoMinimo
+                null,  // montoMaximo
+                null,  // fechaInicio
+                null,  // fechaFin
+                mes,   // mes
+                anio,  // anio
+                null,  // tipoTributario
+                null,  // descripcion
+                null   // nroComprobante
+        );
+        
+        // Ejecutar la consulta con la especificación
+        return ingresoRepository.findAll(specification)
+                .stream()
+                .map(ingresoMapper::toIngresoResponse)
+                .collect(Collectors.toList());
+    }
 
     @Override
     public BigDecimal calcularTotalMesActual(Long clienteId) {

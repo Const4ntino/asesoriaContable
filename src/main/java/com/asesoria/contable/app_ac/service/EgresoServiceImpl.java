@@ -177,6 +177,7 @@ public class EgresoServiceImpl implements EgresoService {
 
     @Override
     public List<EgresoResponse> findByUsuarioId(Long usuarioId) {
+        // Verificar que el usuario existe
         Cliente cliente = clienteRepository.findByUsuarioId(usuarioId)
                 .orElseThrow(ClienteNotFoundException::new);
 
@@ -184,6 +185,35 @@ public class EgresoServiceImpl implements EgresoService {
                 .stream()
                 .map(egresoMapper::toEgresoResponse)
                 .collect(Collectors.toList());
+    }
+    
+    @Override
+    public List<EgresoResponse> findByUsuarioIdAndPeriodo(Long usuarioId, Integer mes, Integer anio) {
+        // Verificar que el usuario existe
+        Cliente cliente = clienteRepository.findByUsuarioId(usuarioId)
+                .orElseThrow(ClienteNotFoundException::new);
+        
+        // Si no se proporcionan filtros de mes y año, devolver todos los egresos del usuario
+        if (mes == null && anio == null) {
+            return findByUsuarioId(usuarioId);
+        }
+        
+        // Usar el método de filtrado existente con paginación
+        Page<EgresoResponse> egresosPage = filtrarEgresos(
+                cliente.getId(),
+                null, // montoMinimo
+                null, // montoMaximo
+                null, // fechaInicio
+                null, // fechaFin
+                mes,  // mes
+                anio,  // anio
+                null, // tipoTributario
+                null, // descripcion
+                null, // nroComprobante
+                Pageable.unpaged() // Sin paginación
+        );
+        
+        return egresosPage.getContent();
     }
 
     @Override

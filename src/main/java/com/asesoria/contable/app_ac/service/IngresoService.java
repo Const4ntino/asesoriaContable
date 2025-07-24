@@ -25,6 +25,15 @@ public interface IngresoService {
     List<IngresoResponse> findByClienteId(Long clienteId);
     List<IngresoResponse> findByClienteIdAndFechaBetween(Long clienteId, LocalDate startDate, LocalDate endDate);
     List<IngresoResponse> findByUsuarioId(Long usuarioId);
+    
+    /**
+     * Busca ingresos por usuario con filtros opcionales de mes y año
+     * @param usuarioId ID del usuario
+     * @param mes Mes opcional para filtrar (1-12)
+     * @param anio Año opcional para filtrar
+     * @return Lista de ingresos filtrados
+     */
+    List<IngresoResponse> findByUsuarioIdAndPeriodo(Long usuarioId, Integer mes, Integer anio);
 
     BigDecimal calcularTotalMesActual(Long clienteId);
     BigDecimal calcularTotalMesAnterior(Long clienteId);

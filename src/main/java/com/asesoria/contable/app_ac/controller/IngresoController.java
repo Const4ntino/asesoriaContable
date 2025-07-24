@@ -102,8 +102,21 @@ public class IngresoController {
     // Filtrar ingresos por cliente
     @PreAuthorize("hasRole('CLIENTE')")
     @GetMapping("/mis-ingresos")
-    public ResponseEntity<List<IngresoResponse>> getMyIngresos(@AuthenticationPrincipal Usuario usuario) {
-        List<IngresoResponse> ingresos = ingresoService.findByUsuarioId(usuario.getId());
+    public ResponseEntity<List<IngresoResponse>> getMyIngresos(
+            @AuthenticationPrincipal Usuario usuario,
+            @RequestParam(required = false) Integer mes,
+            @RequestParam(required = false) Integer anio) {
+        
+        List<IngresoResponse> ingresos;
+        
+        // Si hay filtros de mes o año, usamos el método con filtros
+        if (mes != null || anio != null) {
+            ingresos = ingresoService.findByUsuarioIdAndPeriodo(usuario.getId(), mes, anio);
+        } else {
+            // Si no hay filtros, usamos el método original
+            ingresos = ingresoService.findByUsuarioId(usuario.getId());
+        }
+        
         return ResponseEntity.ok(ingresos);
     }
 

@@ -26,6 +26,9 @@ public interface EgresoService {
     EgresoResponse updateMyEgreso(Long id, EgresoRequest request, Usuario usuario);
     void deleteMyEgreso(Long id, Usuario usuario);
     List<EgresoResponse> findByUsuarioId(Long usuarioId);
+    
+    // Filtrar egresos por usuario, mes y año
+    List<EgresoResponse> findByUsuarioIdAndPeriodo(Long usuarioId, Integer mes, Integer anio);
 
     // PARA MÉTRICAS
     BigDecimal calcularTotalMesActual(Long clienteId);
